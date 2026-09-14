@@ -21,8 +21,13 @@
             --amira-shadow: 0 20px 48px rgba(0, 0, 0, 0.16), 0 8px 24px rgba(0, 164, 228, 0.18);
         }
 
-        .hidden {
+        .hidden,
+        #ai-bot-window.hidden,
+        .amira-nudge-toast.hidden {
             display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
 
         /* Floating Launcher Button */
@@ -161,13 +166,12 @@
             border: 1px solid #e2e8f0 !important;
             border-radius: 20px !important;
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 164, 228, 0.2) !important;
-            display: flex !important;
+            display: none !important;
             flex-direction: column !important;
             z-index: 2147483646 !important;
             overflow: hidden !important;
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
             transform-origin: bottom right !important;
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
             box-sizing: border-box !important;
         }
 
@@ -567,7 +571,7 @@
         if (chatInitialized || targetDoc.getElementById('ai-bot-launcher')) return;
         chatInitialized = true;
         injectStyles(targetDoc);
-        injectStyles(document); // Also inject locally just in case
+        injectStyles(document);
 
         // Create Launcher Button
         const launcher = targetDoc.createElement('div');
@@ -577,7 +581,7 @@
             <svg id="launcher-icon-chat" viewBox="0 0 24 24">
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9a1 1 0 0 0 1.258 1.258L8 21.862A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
             </svg>
-            <svg id="launcher-icon-close" class="hidden" viewBox="0 0 24 24">
+            <svg id="launcher-icon-close" style="display: none;" viewBox="0 0 24 24">
                 <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
             </svg>
             <span class="launcher-badge"></span>
@@ -602,6 +606,7 @@
         const chatWindow = targetDoc.createElement('div');
         chatWindow.id = 'ai-bot-window';
         chatWindow.className = 'hidden';
+        chatWindow.style.setProperty('display', 'none', 'important');
         chatWindow.innerHTML = `
             <div class="amira-header">
                 <div class="amira-header-left">
@@ -664,13 +669,25 @@
         nudgeTimeout = setTimeout(function () {
             if (!isOpen && nudgeToast) {
                 nudgeToast.classList.remove('hidden');
+                nudgeToast.style.setProperty('display', 'flex', 'important');
             }
         }, 2500);
 
         // Event Listeners
-        launcher.addEventListener('click', toggleChat);
-        targetDoc.getElementById('amira-close-btn').addEventListener('click', toggleChat);
-        targetDoc.getElementById('amira-reset-btn').addEventListener('click', resetChat);
+        launcher.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleChat();
+        });
+
+        targetDoc.getElementById('amira-close-btn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeChat();
+        });
+
+        targetDoc.getElementById('amira-reset-btn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            resetChat();
+        });
 
         // Nudge click opens chat
         nudgeToast.addEventListener('click', function (e) {
@@ -680,7 +697,7 @@
                 return;
             }
             dismissNudge();
-            if (!isOpen) toggleChat();
+            openChat();
         });
 
         const inputField = targetDoc.getElementById('amira-input');
@@ -690,6 +707,13 @@
         inputField.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 handleUserSend();
+            }
+        });
+
+        // Close on Escape key
+        targetDoc.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeChat();
             }
         });
 
@@ -710,6 +734,7 @@
         const nudgeToast = targetDoc.getElementById('amira-nudge-toast');
         if (nudgeToast) {
             nudgeToast.classList.add('hidden');
+            nudgeToast.style.setProperty('display', 'none', 'important');
         }
         if (nudgeTimeout) {
             clearTimeout(nudgeTimeout);
@@ -717,7 +742,7 @@
         }
     }
 
-    function toggleChat() {
+    function openChat() {
         const targetDoc = getTargetDocument();
         const chatWindow = targetDoc.getElementById('ai-bot-window');
         const launcher = targetDoc.getElementById('ai-bot-launcher');
@@ -725,20 +750,45 @@
         const iconClose = targetDoc.getElementById('launcher-icon-close');
         if (!chatWindow) return;
 
-        isOpen = !isOpen;
-        chatWindow.classList.toggle('hidden', !isOpen);
+        isOpen = true;
+        chatWindow.classList.remove('hidden');
+        chatWindow.style.setProperty('display', 'flex', 'important');
+        chatWindow.style.setProperty('opacity', '1', 'important');
+        chatWindow.style.setProperty('pointer-events', 'auto', 'important');
 
+        dismissNudge();
+        if (launcher) launcher.title = 'Close chat agent';
+        if (iconChat) iconChat.style.display = 'none';
+        if (iconClose) iconClose.style.display = 'block';
+
+        const inputField = targetDoc.getElementById('amira-input');
+        if (inputField) inputField.focus();
+    }
+
+    function closeChat() {
+        const targetDoc = getTargetDocument();
+        const chatWindow = targetDoc.getElementById('ai-bot-window');
+        const launcher = targetDoc.getElementById('ai-bot-launcher');
+        const iconChat = targetDoc.getElementById('launcher-icon-chat');
+        const iconClose = targetDoc.getElementById('launcher-icon-close');
+        if (!chatWindow) return;
+
+        isOpen = false;
+        chatWindow.classList.add('hidden');
+        chatWindow.style.setProperty('display', 'none', 'important');
+        chatWindow.style.setProperty('opacity', '0', 'important');
+        chatWindow.style.setProperty('pointer-events', 'none', 'important');
+
+        if (launcher) launcher.title = 'Ask Amira - ERP Assistant';
+        if (iconChat) iconChat.style.display = 'block';
+        if (iconClose) iconClose.style.display = 'none';
+    }
+
+    function toggleChat() {
         if (isOpen) {
-            dismissNudge();
-            launcher.title = 'Close chat agent';
-            if (iconChat) iconChat.classList.add('hidden');
-            if (iconClose) iconClose.classList.remove('hidden');
-            const inputField = targetDoc.getElementById('amira-input');
-            if (inputField) inputField.focus();
+            closeChat();
         } else {
-            launcher.title = 'Ask Amira - ERP Assistant';
-            if (iconChat) iconChat.classList.remove('hidden');
-            if (iconClose) iconClose.classList.add('hidden');
+            openChat();
         }
     }
 

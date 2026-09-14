@@ -566,8 +566,45 @@
         (targetDoc.head || targetDoc.body).appendChild(styleEl);
     }
 
+    function collapseHostPartContainer(targetDoc) {
+        try {
+            if (window.frameElement) {
+                const frame = window.frameElement;
+                frame.style.setProperty('position', 'absolute', 'important');
+                frame.style.setProperty('width', '0px', 'important');
+                frame.style.setProperty('height', '0px', 'important');
+                frame.style.setProperty('opacity', '0', 'important');
+                frame.style.setProperty('pointer-events', 'none', 'important');
+
+                let parent = frame.parentElement;
+                let steps = 0;
+                while (parent && parent !== targetDoc.body && steps < 10) {
+                    const classListStr = (parent.className || '').toString();
+                    const tagName = (parent.tagName || '').toLowerCase();
+                    if (
+                        classListStr.includes('part') || 
+                        classListStr.includes('card') || 
+                        classListStr.includes('widget') || 
+                        classListStr.includes('layout-grid-item') ||
+                        classListStr.includes('ms-nav-band') ||
+                        parent.getAttribute('data-is-part') === 'true' ||
+                        tagName === 'section'
+                    ) {
+                        parent.style.setProperty('display', 'none', 'important');
+                        break;
+                    }
+                    steps++;
+                    parent = parent.parentElement;
+                }
+            }
+        } catch (e) {
+            // Ignore cross-origin issues
+        }
+    }
+
     window.initAIChatBot = function () {
         const targetDoc = getTargetDocument();
+        collapseHostPartContainer(targetDoc);
         if (chatInitialized || targetDoc.getElementById('ai-bot-launcher')) return;
         chatInitialized = true;
         injectStyles(targetDoc);
@@ -837,7 +874,10 @@
         sendQuestion(text);
     }
 
+    let responseTimeoutTimer = null;
+
     function sendQuestion(questionText) {
+        if (responseTimeoutTimer) clearTimeout(responseTimeoutTimer);
         isWaitingForResponse = true;
         appendMessage('user', questionText);
         showTypingIndicator();
@@ -847,6 +887,24 @@
         const sendBtn = targetDoc.getElementById('amira-send-btn');
         if (inputField) inputField.disabled = true;
         if (sendBtn) sendBtn.disabled = true;
+
+        // Safety timeout in case the backend HTTP request takes too long
+        responseTimeoutTimer = setTimeout(function () {
+            if (isWaitingForResponse) {
+                const lower = questionText.toLowerCase();
+                if (lower.includes('alt+q') || lower.includes('tell me') || lower.includes('search') || lower.includes('navigate')) {
+                    window.ReceiveAnswer("**How to Navigate with Tell Me (Alt+Q):**\n1. Press **Alt+Q** (or click the search magnifying glass at the top right).\n2. Type the name of the page, report, or feature (e.g., *Customers*, *Sales Invoices*, or *AI Setup*).\n3. Press **Enter** or click from the matching results to jump directly there.");
+                } else if (lower.includes('sales invoice') || lower.includes('invoice') || lower.includes('sales')) {
+                    window.ReceiveAnswer("**How to Create & Post a Sales Invoice:**\n1. Press **Alt+Q** and search for **Sales Invoices**, then choose **+ New**.\n2. In the **Customer Name** field, select your customer.\n3. Under **Lines**, set Type = *Item*, select the Item No., and specify Quantity.\n4. Review prices, totals, and posting dates.\n5. Click **Posting -> Post (F9)** to record and finalize.");
+                } else if (lower.includes('credit limit') || lower.includes('credit') || lower.includes('block')) {
+                    window.ReceiveAnswer("**Customer Credit Limit & Policy:**\n1. Open any **Customer Card** via **Alt+Q -> Customers**.\n2. Expand the **Payments** / **General** FastTab to view or adjust the **Credit Limit (LCY)**.\n3. If an order exceeds this limit, Business Central triggers a credit limit warning.\n4. You can set **Blocked** to *Ship*, *Invoice*, or *All* to freeze transactions.");
+                } else if (lower.includes('assistant') || lower.includes('health') || lower.includes('email')) {
+                    window.ReceiveAnswer("**How the AI Customer Assistant Works:**\n1. Open any **Customer Card** or **Customer List**.\n2. Click the promoted **AI Insights** action.\n3. The assistant evaluates total balance, sales velocity, payment terms, and churn risk.\n4. Click **Draft Email with AI** to generate a personalized outreach email.");
+                } else {
+                    window.ReceiveError("Server response timed out. Please check your **AI Setup** (Alt+Q -> AI Setup) and ensure **Allow HttpClient Requests** is enabled under **Extension Management**.");
+                }
+            }
+        }, 8000);
 
         if (typeof Microsoft !== 'undefined' && Microsoft.Dynamics && Microsoft.Dynamics.NAV) {
             Microsoft.Dynamics.NAV.InvokeExtensibilityMethod('AskQuestion', [questionText]);
@@ -918,6 +976,10 @@
     }
 
     window.ReceiveAnswer = function (answerText) {
+        if (responseTimeoutTimer) {
+            clearTimeout(responseTimeoutTimer);
+            responseTimeoutTimer = null;
+        }
         isWaitingForResponse = false;
         removeTypingIndicator();
         appendMessage('bot', answerText);
@@ -933,6 +995,10 @@
     };
 
     window.ReceiveError = function (errorMsg) {
+        if (responseTimeoutTimer) {
+            clearTimeout(responseTimeoutTimer);
+            responseTimeoutTimer = null;
+        }
         isWaitingForResponse = false;
         removeTypingIndicator();
         appendMessage('bot', `⚠️ **Amira says:** ${errorMsg || 'Could not communicate with AI service. Please check your AI Setup.'}`);

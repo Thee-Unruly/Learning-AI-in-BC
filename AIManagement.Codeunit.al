@@ -169,23 +169,77 @@ codeunit 50100 "AI Management"
     procedure AskERPGuide(UserQuestion: Text): Text
     var
         Prompt: Text;
+        Answer: Text;
+        AISetup: Record "AI Setup";
     begin
-        Prompt := StrSubstNo(
-            'You are Amira, a knowledgeable, friendly, and expert ERP Onboarding & System Guide AI for Microsoft Dynamics 365 Business Central.\' +
-            'Introduce yourself as Amira when asked. Provide clear, concise, and step-by-step instructions for the user.\' +
-            'Core System Knowledge:\' +
-            '- Global Search: Press Alt+Q (Tell Me) to search for any page, report, or task in Business Central.\' +
-            '- Sales Invoices / Orders: Located under Sales -> Sales Orders or Sales Invoices. Required fields: Customer No., Posting Date, Line items (Type, No., Quantity, Unit Price). Use "Post" (F9) or "Post and Send" to finalize.\' +
-            '- Customer Credit Limit & Block Policy: If a customer balance exceeds their credit limit, orders require Finance Manager approval. Customers can be set to Blocked (Ship/Invoice/All) on the Customer Card.\' +
-            '- Payment Terms: Standard terms are Net 30, COD, or 1M(8D). Checked against customer ledger entries and due dates.\' +
-            '- AI Customer Assistant Extension: Adds an "AI Insights" action on Customer Card and List to run executive risk analysis and draft context-aware outreach emails.\' +
-            '- AI Setup Page: Search "AI Setup" via Alt+Q to configure API Endpoint, Model, and API Key.\\' +
-            'User Question: %1\\' +
-            'Answer in a helpful, structured tone with numbered steps and bold UI terms.',
-            UserQuestion
-        );
+        AISetup.GetSetup();
 
-        exit(AskAI(Prompt));
+        // If API Key is configured, use live LLM
+        if (AISetup."API Key" <> '') and (AISetup."API Endpoint" <> '') then begin
+            Prompt := StrSubstNo(
+                'You are Amira, a knowledgeable, friendly, and expert ERP Onboarding & System Guide AI for Microsoft Dynamics 365 Business Central.\' +
+                'Introduce yourself as Amira when asked. Provide clear, concise, and step-by-step instructions for the user.\' +
+                'Core System Knowledge:\' +
+                '- Global Search: Press Alt+Q (Tell Me) to search for any page, report, or task in Business Central.\' +
+                '- Sales Invoices / Orders: Located under Sales -> Sales Orders or Sales Invoices. Required fields: Customer No., Posting Date, Line items (Type, No., Quantity, Unit Price). Use "Post" (F9) or "Post and Send" to finalize.\' +
+                '- Customer Credit Limit & Block Policy: If a customer balance exceeds their credit limit, orders require Finance Manager approval. Customers can be set to Blocked (Ship/Invoice/All) on the Customer Card.\' +
+                '- Payment Terms: Standard terms are Net 30, COD, or 1M(8D). Checked against customer ledger entries and due dates.\' +
+                '- AI Customer Assistant Extension: Adds an "AI Insights" action on Customer Card and List to run executive risk analysis and draft context-aware outreach emails.\' +
+                '- AI Setup Page: Search "AI Setup" via Alt+Q to configure API Endpoint, Model, and API Key.\\' +
+                'User Question: %1\\' +
+                'Answer in a helpful, structured tone with numbered steps and bold UI terms.',
+                UserQuestion
+            );
+            if TryAskAI(Prompt, Answer) then
+                exit(Answer);
+        end;
+
+        // Built-in ERP Knowledge Base Fallback
+        exit(GetBuiltInERPAnswer(UserQuestion));
+    end;
+
+    local procedure GetBuiltInERPAnswer(UserQuestion: Text): Text
+    var
+        LowerQ: Text;
+    begin
+        LowerQ := LowerCase(UserQuestion);
+
+        if (LowerQ.Contains('alt+q')) or (LowerQ.Contains('tell me')) or (LowerQ.Contains('find') and LowerQ.Contains('page')) or (LowerQ.Contains('search')) or (LowerQ.Contains('navigate')) then
+            exit('**How to Navigate with Tell Me (Alt+Q):**\' +
+                 '1. Press **Alt+Q** (or click the search magnifying glass at the top right).' +
+                 '\2. Type the name of the page, report, or feature (e.g., *Customers*, *Sales Invoices*, or *AI Setup*).' +
+                 '\3. Press **Enter** or click from the matching results to jump directly there.');
+
+        if (LowerQ.Contains('sales invoice')) or (LowerQ.Contains('invoice')) or (LowerQ.Contains('create') and LowerQ.Contains('sales')) then
+            exit('**How to Create & Post a Sales Invoice:**\' +
+                 '1. Press **Alt+Q** and search for **Sales Invoices**, then choose **+ New**.' +
+                 '\2. In the **Customer Name** field, select your customer.' +
+                 '\3. Under **Lines**, set Type = *Item*, select the Item No., and specify Quantity.' +
+                 '\4. Review prices, totals, and posting dates.' +
+                 '\5. Click **Posting -> Post (F9)** or **Post and Send** to finalize.');
+
+        if (LowerQ.Contains('credit limit')) or (LowerQ.Contains('credit')) or (LowerQ.Contains('block')) then
+            exit('**Customer Credit Limit & Policy:**\' +
+                 '1. Open any **Customer Card** via **Alt+Q -> Customers**.' +
+                 '\2. Expand the **Payments** / **General** FastTab to view or adjust the **Credit Limit (LCY)**.' +
+                 '\3. If an order causes the customer balance to exceed this limit, Business Central triggers a credit limit warning.' +
+                 '\4. You can set **Blocked** to *Ship*, *Invoice*, or *All* to freeze transactions.');
+
+        if (LowerQ.Contains('customer assistant')) or (LowerQ.Contains('assistant')) or (LowerQ.Contains('health')) or (LowerQ.Contains('email')) then
+            exit('**How the AI Customer Assistant Works:**\' +
+                 '1. Open any **Customer Card** or **Customer List**.' +
+                 '\2. Click the promoted **AI Insights** action.' +
+                 '\3. The assistant automatically evaluates total balance, sales velocity, payment terms, and churn risk.' +
+                 '\4. Click **Draft Email with AI** to generate a personalized outreach email tailored to account metrics.');
+
+        if (LowerQ.Contains('who are you')) or (LowerQ.Contains('hello')) or (LowerQ.Contains('hi')) or (LowerQ.Contains('amira')) then
+            exit('Hello! I am **Amira**, your ERP Assistant for Microsoft Dynamics 365 Business Central. Ask me anything about navigating Business Central, posting invoices, managing credit limits, or configuring AI features!');
+
+        exit('To enable full live generative AI for arbitrary questions, please configure your **Groq API Key** in Business Central:\' +
+             '1. Press **Alt+Q** and search for **AI Setup**.' +
+             '\2. Enter your Groq API Key (`gsk_...`).' +
+             '\3. Set Model Name to `llama-3.3-70b-versatile`.' +
+             '\4. Click **Test AI Connection** to verify.');
     end;
 
     [TryFunction]

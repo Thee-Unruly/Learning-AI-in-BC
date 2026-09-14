@@ -44,7 +44,7 @@ table 50100 "AI Setup"
             Init();
             "Primary Key" := '';
             "API Endpoint" := 'https://api.groq.com/openai/v1/chat/completions';
-            "Model Name" := 'gpt-oss-120b';
+            "Model Name" := 'llama-3.3-70b-versatile';
             Insert();
         end;
     end;

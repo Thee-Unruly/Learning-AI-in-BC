@@ -59,7 +59,7 @@ codeunit 50100 "AI Management"
 
         // Send HTTP Request
         if not Client.Send(RequestMessage, ResponseMessage) then
-            Error('Could not connect to AI API endpoint: %1\n\nEnsure that "Allow HttpClient Requests" is enabled for this extension under Extension Management in Business Central.', AISetup."API Endpoint");
+            Error('Could not connect to AI API endpoint: %1\\Ensure that "Allow HttpClient Requests" is enabled for this extension under Extension Management in Business Central.', AISetup."API Endpoint");
 
         ResponseMessage.Content.ReadAs(ResponseText);
 

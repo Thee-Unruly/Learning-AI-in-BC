@@ -48,7 +48,7 @@ pageextension 50100 CustomerListAIExt extends "Customer List"
                         );
 
                         AIResponse := AIMgmt.AskAI(Prompt);
-                        Message('🤖 AI Insights for %1:\n\n%2', Rec.Name, AIResponse);
+                        Message('🤖 AI Insights for %1:\\%2', Rec.Name, AIResponse);
                     end;
                 }
             }

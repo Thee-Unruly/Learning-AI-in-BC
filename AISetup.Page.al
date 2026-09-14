@@ -60,7 +60,7 @@ page 50100 "AI Setup"
                 begin
                     CurrPage.SaveRecord();
                     Response := AIMgmt.AskAI('Hello! In 1 short sentence, confirm you are connected to Microsoft Dynamics 365 Business Central.');
-                    Message('🤖 AI Connection Test Successful!\n\nResponse:\n%1', Response);
+                    Message('🤖 AI Connection Test Successful!\\Response:\%1', Response);
                 end;
             }
         }

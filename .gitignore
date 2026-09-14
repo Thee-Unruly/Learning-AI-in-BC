@@ -1,0 +1,10 @@
+# Business Central AL Artifacts and Packages (Heavy Microsoft Symbols)
+.alpackages/
+*.app
+.snapshots/
+rad.json
+
+# VS Code / AL Cache
+*.g.al
+.vscode/launch.json
+.vscode/settings.json

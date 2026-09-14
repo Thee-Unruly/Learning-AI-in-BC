@@ -32,16 +32,17 @@ pageextension 50101 CustomerCardAIExt extends "Customer Card"
                     begin
                         Rec.CalcFields("Balance (LCY)", "Sales (LCY)");
                         Prompt := StrSubstNo(
-                            'Analyze this customer from Business Central:\' +
-                            '- Customer No: %1\' +
-                            '- Customer Name: %2\' +
-                            '- Balance (LCY): %3\' +
-                            '- Total Sales (LCY): %4\' +
-                            '- Credit Limit (LCY): %5\' +
-                            '- Payment Terms: %6\\' +
-                            'Provide a 2-bullet executive summary: 1) Account Health, 2) Recommended Next Action.',
-                            Rec."No.",
+                            'Analyze this customer in Microsoft Dynamics 365 Business Central:\' +
+                            'Customer: %1 (%2)\' +
+                            'Balance: %3 LCY\' +
+                            'Sales: %4 LCY\' +
+                            'Credit Limit: %5 LCY\' +
+                            'Payment Terms: %6\\' +
+                            'Provide exactly two sections without markdown asterisks:\' +
+                            '• Account Health: (1 concise sentence)\' +
+                            '• Next Action: (1 actionable sentence)',
                             Rec.Name,
+                            Rec."No.",
                             Rec."Balance (LCY)",
                             Rec."Sales (LCY)",
                             Rec."Credit Limit (LCY)",
@@ -49,7 +50,7 @@ pageextension 50101 CustomerCardAIExt extends "Customer Card"
                         );
 
                         AIResponse := AIMgmt.AskAI(Prompt);
-                        Message('🤖 AI Insights for %1:\\%2', Rec.Name, AIResponse);
+                        Message('🤖 AI Insights: %1\\%2', Rec.Name, AIResponse);
                     end;
                 }
             }

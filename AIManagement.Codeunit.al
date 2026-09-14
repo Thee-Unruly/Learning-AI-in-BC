@@ -30,7 +30,7 @@ codeunit 50100 "AI Management"
 
         // Build OpenAI-compatible chat completion payload
         SystemMessageJson.Add('role', 'system');
-        SystemMessageJson.Add('content', 'You are an AI assistant embedded directly inside Microsoft Dynamics 365 Business Central. Provide concise, clear, and business-oriented answers.');
+        SystemMessageJson.Add('content', 'You are an AI assistant embedded directly inside Microsoft Dynamics 365 Business Central. Return clean, professional plain text formatted for ERP message boxes. Do NOT use markdown symbols like asterisks (** or *), hashes (###), or markdown bolding. Use clear bullet points and line breaks.');
         MessagesArray.Add(SystemMessageJson);
 
         UserMessageJson.Add('role', 'user');
@@ -39,7 +39,7 @@ codeunit 50100 "AI Management"
 
         PayloadJson.Add('model', AISetup."Model Name");
         PayloadJson.Add('messages', MessagesArray);
-        PayloadJson.Add('temperature', 0.7);
+        PayloadJson.Add('temperature', 0.5);
 
         PayloadJson.WriteTo(PayloadText);
 
@@ -75,6 +75,19 @@ codeunit 50100 "AI Management"
         end else
             AnswerText := ResponseText;
 
+        AnswerText := CleanFormatting(AnswerText);
+
         exit(AnswerText);
+    end;
+
+    local procedure CleanFormatting(InputText: Text): Text
+    var
+        Cleaned: Text;
+    begin
+        Cleaned := InputText.Replace('**', '');
+        Cleaned := Cleaned.Replace('### ', '');
+        Cleaned := Cleaned.Replace('## ', '');
+        Cleaned := Cleaned.Replace('# ', '');
+        exit(Cleaned);
     end;
 }

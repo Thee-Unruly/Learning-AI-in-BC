@@ -1,52 +1,36 @@
 # Learning-AI-in-BC
 
-A Proof of Concept (PoC) demonstrating how to natively integrate external Artificial Intelligence (**Groq Cloud**, OpenAI, Anthropic, DeepSeek, or Local Ollama) directly inside **Microsoft Dynamics 365 Business Central (AL)**.
+A Proof of Concept demonstrating native integration between **Microsoft Dynamics 365 Business Central** and external Generative AI models (**Groq Cloud / OpenAI / Anthropic / Local LLMs**) using pure AL code.
 
 ---
 
-## ⚡ Why Groq for Business Central?
+## 🚀 Key Capabilities
 
-- **Ultra-low latency inference**: Delivers responses in milliseconds, making in-ERP ERP interactions feel instantaneous.
-- **OpenAI Compatibility**: Seamlessly integrates using standard OpenAI chat completion payloads.
-- **Top Open-Weights Models**: Powered by `llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, `mixtral-8x7b-32768`, etc.
+### 1. 🏢 Executive Account Intelligence
+- **Natural, Human-Like Tone**: Tailored, professional enterprise phrasing without robotic buzzwords or emoji clutter.
+- **Collapsible FastTabs**: Organized into clean collapsible sections for Customer Overview, Executive Analysis, and Email Drafting.
+- **Live ERP Context**: Dynamically analyzes customer balances, lifetime sales volume, credit limits, and payment terms.
+
+### 2. ✉️ Smart Business Email Drafter
+- **Context-Aware Outreach**: Generates tailored emails (Re-engagement, Executive Check-in, Partnership Expansion, Balance Review) based on live account activity.
+- **Editable Subject & Body**: Review and customize the generated email directly in Business Central before sending.
+- **1-Click Mail Client Integration**: Open the draft directly in Outlook or your default email client with recipient, subject, and body automatically populated.
+
+### 3. ⚙️ Universal AI Integration Engine
+- **Configurable Setup Page**: Set Endpoints, Model IDs (e.g. `gpt-oss-120b`, `llama-3.3-70b-versatile`), and API Keys without touching code.
+- **Reusable AL Codeunit**: `AIManagement.AskAI(Prompt)` and `AIManagement.GenerateCustomerEmail(...)` can be leveraged across any BC object.
 
 ---
 
-## 🚀 Features
-
-- **Native REST & JSON**: Uses AL's native `HttpClient` and `JsonObject` structures to communicate with Groq's high-speed API.
-- **Dynamic AI Setup Page**: Configure API Endpoints, Model Names, and your Groq API Key (`gsk_...`) directly inside Business Central without hardcoding secrets.
-- **Connection Test Action**: Built-in test trigger in the setup card to verify connectivity to Groq.
-- **ERP Business Context Analysis**: Custom page extension on the **Customer List** that extracts real ERP customer metrics (Balance, Sales, Credit Limit, Terms) and sends them to the AI for executive summaries and risk recommendations.
-
----
-
-## 📂 Project Structure
+## 📂 Project Architecture
 
 ```text
 ALProject1/
-├── app.json                       # Extension manifest & runtime configuration
-├── AISetup.Table.al               # Table storing endpoint, model, and masked API key
-├── AISetup.Page.al                # Setup UI with connection test action
-├── AIManagement.Codeunit.al       # Core service for HTTP calls & JSON serialization
-└── CustomerListAIExt.PageExt.al   # Customer List extension with "Analyze with AI" action
+├── app.json                          # Extension manifest & runtime configuration
+├── AISetup.Table.al                  # Setup table for credentials & endpoint
+├── AISetup.Page.al                   # Setup card with connection test action
+├── AIManagement.Codeunit.al          # Universal HTTP/JSON AI service & email generator
+├── AICustomerAssistant.Page.al       # Interactive workspace with collapsible sections & email drafter
+├── CustomerCardAIExt.PageExt.al      # Customer Card extension linking to AI Assistant
+└── CustomerListAIExt.PageExt.al      # Customer List extension linking to AI Assistant
 ```
-
----
-
-## 🛠️ Configuration Defaults
-
-| Setting | Default Value |
-| :--- | :--- |
-| **API Endpoint** | `https://api.groq.com/openai/v1/chat/completions` |
-| **Model Name** | `gpt-oss-120b` *(or `gpt-oss-20b`, `llama-3.3-70b-versatile`)* |
-| **API Key** | Your Groq API Key (`gsk_...`) |
-
----
-
-## 🏁 Quickstart
-
-1. Build and publish the extension (**`F5`** or **`Ctrl+F5`**).
-2. In Business Central, open **Extension Management** → Find **ALProject1** → **Configure** → Enable **Allow HttpClient Requests**.
-3. Search for **AI Setup** (`Alt+Q`), paste your `gsk_...` Groq API key, and click **Test AI Connection**.
-4. Open the **Customers** list and click **Analyze with AI** on any customer record!

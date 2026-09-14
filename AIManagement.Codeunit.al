@@ -1,5 +1,7 @@
 namespace DefaultPublisher.ALProject1;
 
+using Microsoft.Sales.Customer;
+
 codeunit 50100 "AI Management"
 {
     Access = Public;
@@ -28,9 +30,9 @@ codeunit 50100 "AI Management"
         if AISetup."API Endpoint" = '' then
             Error('Please configure the API Endpoint in the AI Setup page.');
 
-        // Build OpenAI-compatible chat completion payload
+        // Executive, natural human tone without cheesy emoji overload
         SystemMessageJson.Add('role', 'system');
-        SystemMessageJson.Add('content', 'You are an AI assistant embedded directly inside Microsoft Dynamics 365 Business Central. Return clean, professional plain text formatted for ERP message boxes. Do NOT use markdown symbols like asterisks (** or *), hashes (###), or markdown bolding. Use clear bullet points and line breaks.');
+        SystemMessageJson.Add('content', 'You are an executive enterprise assistant in Microsoft Dynamics 365 Business Central. Write in a sophisticated, clear, and natural human business tone. Avoid emojis, buzzwords, or markdown symbols like asterisks (** or *). Be concise, insightful, and practical.');
         MessagesArray.Add(SystemMessageJson);
 
         UserMessageJson.Add('role', 'user');
@@ -39,7 +41,7 @@ codeunit 50100 "AI Management"
 
         PayloadJson.Add('model', AISetup."Model Name");
         PayloadJson.Add('messages', MessagesArray);
-        PayloadJson.Add('temperature', 0.5);
+        PayloadJson.Add('temperature', 0.6);
 
         PayloadJson.WriteTo(PayloadText);
 
@@ -78,6 +80,64 @@ codeunit 50100 "AI Management"
         AnswerText := CleanFormatting(AnswerText);
 
         exit(AnswerText);
+    end;
+
+    procedure GenerateCustomerEmail(Cust: Record Customer; EmailObjective: Text; AdditionalNotes: Text; var EmailSubject: Text; var EmailBody: Text)
+    var
+        Prompt: Text;
+        RawResponse: Text;
+        SubjectPos: Integer;
+        BodyPos: Integer;
+        RecipientName: Text;
+    begin
+        Cust.CalcFields("Balance (LCY)", "Sales (LCY)");
+
+        RecipientName := Cust.Contact;
+        if RecipientName = '' then
+            RecipientName := Cust.Name;
+
+        Prompt := StrSubstNo(
+            'Write a polished business outreach email to this customer based on our ERP account history:\' +
+            'Customer Name: %1\' +
+            'Contact Person: %2\' +
+            'Email: %3\' +
+            'Current Outstanding Balance: %4 LCY\' +
+            'Lifetime Sales Volume: %5 LCY\' +
+            'Payment Terms: %6\' +
+            'Primary Email Goal: %7\' +
+            'Account Manager Notes: %8\\' +
+            'Guidelines:\' +
+            '- Write as a senior business relationship manager.\' +
+            '- Tone: Genuine, respectful, tailored to their relationship status, and human. Do NOT sound like an AI.\' +
+            '- Reference context intelligently (e.g. if sales is zero or dormant, focus on re-introducing value and exploring synergies; if balance is active, be constructive and collaborative).\' +
+            '- Provide the output with exact markers:\' +
+            'SUBJECT: <Subject Line>\' +
+            'BODY:\' +
+            '<Full Email Body with proper greeting and sign-off placeholder>',
+            Cust.Name,
+            RecipientName,
+            Cust."E-Mail",
+            Cust."Balance (LCY)",
+            Cust."Sales (LCY)",
+            Cust."Payment Terms Code",
+            EmailObjective,
+            AdditionalNotes
+        );
+
+        RawResponse := AskAI(Prompt);
+
+        SubjectPos := StrPos(RawResponse, 'SUBJECT:');
+        BodyPos := StrPos(RawResponse, 'BODY:');
+
+        if (SubjectPos > 0) and (BodyPos > SubjectPos) then begin
+            EmailSubject := CopyStr(RawResponse, SubjectPos + 8, BodyPos - (SubjectPos + 8));
+            EmailSubject := DelChr(EmailSubject, '<>', ' ' + Chr(13) + Chr(10));
+            EmailBody := CopyStr(RawResponse, BodyPos + 5);
+            EmailBody := DelChr(EmailBody, '<>', ' ' + Chr(13) + Chr(10));
+        end else begin
+            EmailSubject := StrSubstNo('Partnership & Account Discussion: %1', Cust.Name);
+            EmailBody := RawResponse;
+        end;
     end;
 
     local procedure CleanFormatting(InputText: Text): Text

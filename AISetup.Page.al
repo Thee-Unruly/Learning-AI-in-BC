@@ -26,7 +26,7 @@ page 50100 "AI Setup"
                 field("Model Name"; Rec."Model Name")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'The model identifier (e.g., llama-3.3-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b-32768).';
+                    ToolTip = 'The model identifier (e.g., gpt-oss-120b, gpt-oss-20b, llama-3.3-70b-versatile).';
                 }
                 field("API Key"; Rec."API Key")
                 {

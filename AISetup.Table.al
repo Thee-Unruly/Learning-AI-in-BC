@@ -43,8 +43,8 @@ table 50100 "AI Setup"
         if not Get() then begin
             Init();
             "Primary Key" := '';
-            "API Endpoint" := 'https://api.openai.com/v1/chat/completions';
-            "Model Name" := 'gpt-4o-mini';
+            "API Endpoint" := 'https://api.groq.com/openai/v1/chat/completions';
+            "Model Name" := 'llama-3.3-70b-versatile';
             Insert();
         end;
     end;

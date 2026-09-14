@@ -1,14 +1,22 @@
 # Learning-AI-in-BC
 
-A Proof of Concept (PoC) demonstrating how to natively integrate external Artificial Intelligence (OpenAI, Anthropic, DeepSeek, Local Ollama, or Custom REST APIs) directly inside **Microsoft Dynamics 365 Business Central (AL)**.
+A Proof of Concept (PoC) demonstrating how to natively integrate external Artificial Intelligence (**Groq Cloud**, OpenAI, Anthropic, DeepSeek, or Local Ollama) directly inside **Microsoft Dynamics 365 Business Central (AL)**.
+
+---
+
+## ⚡ Why Groq for Business Central?
+
+- **Ultra-low latency inference**: Delivers responses in milliseconds, making in-ERP ERP interactions feel instantaneous.
+- **OpenAI Compatibility**: Seamlessly integrates using standard OpenAI chat completion payloads.
+- **Top Open-Weights Models**: Powered by `llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, `mixtral-8x7b-32768`, etc.
 
 ---
 
 ## 🚀 Features
 
-- **Native REST & JSON**: Uses AL's native `HttpClient` and `JsonObject` structures to communicate with any OpenAI-compatible chat completion endpoint.
-- **Dynamic AI Setup Page**: Configure API Endpoints, Model Names (e.g. `gpt-4o-mini`, `deepseek-chat`, `llama3`), and API Keys directly inside Business Central without hardcoding secrets.
-- **Connection Test Action**: Built-in test trigger in the setup card to verify connectivity to the external LLM.
+- **Native REST & JSON**: Uses AL's native `HttpClient` and `JsonObject` structures to communicate with Groq's high-speed API.
+- **Dynamic AI Setup Page**: Configure API Endpoints, Model Names, and your Groq API Key (`gsk_...`) directly inside Business Central without hardcoding secrets.
+- **Connection Test Action**: Built-in test trigger in the setup card to verify connectivity to Groq.
 - **ERP Business Context Analysis**: Custom page extension on the **Customer List** that extracts real ERP customer metrics (Balance, Sales, Credit Limit, Terms) and sends them to the AI for executive summaries and risk recommendations.
 
 ---
@@ -26,15 +34,19 @@ ALProject1/
 
 ---
 
-## 🛠️ Getting Started
+## 🛠️ Configuration Defaults
 
-### 1. Requirements
-- Business Central 24+ / 26+ (On-Premises or Cloud)
-- AL Language Extension for VS Code
-- An API Key from OpenAI, OpenRouter, Groq, or a local Ollama instance
+| Setting | Default Value |
+| :--- | :--- |
+| **API Endpoint** | `https://api.groq.com/openai/v1/chat/completions` |
+| **Model Name** | `llama-3.3-70b-versatile` *(or `llama-3.1-8b-instant`)* |
+| **API Key** | Your Groq API Key (`gsk_...`) |
 
-### 2. Deployment
-1. Download symbols in VS Code (`AL: Download Symbols`).
-2. Build and publish the extension (`F5` or `Ctrl+F5`).
-3. In Business Central, navigate to **Extension Management** → Find **ALProject1** → **Configure** → Enable **Allow HttpClient Requests**.
-4. Search for **AI Setup** (`Alt+Q`), enter your API Key and Endpoint, and click **Test AI Connection**.
+---
+
+## 🏁 Quickstart
+
+1. Build and publish the extension (**`F5`** or **`Ctrl+F5`**).
+2. In Business Central, open **Extension Management** → Find **ALProject1** → **Configure** → Enable **Allow HttpClient Requests**.
+3. Search for **AI Setup** (`Alt+Q`), paste your `gsk_...` Groq API key, and click **Test AI Connection**.
+4. Open the **Customers** list and click **Analyze with AI** on any customer record!

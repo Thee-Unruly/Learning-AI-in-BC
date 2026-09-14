@@ -21,18 +21,18 @@ page 50100 "AI Setup"
                 field("API Endpoint"; Rec."API Endpoint")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'The REST API endpoint URL (e.g. OpenAI, Groq, OpenRouter, or your local Ollama instance).';
+                    ToolTip = 'The REST API endpoint URL (e.g., https://api.groq.com/openai/v1/chat/completions).';
                 }
                 field("Model Name"; Rec."Model Name")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'The model identifier (e.g., gpt-4o-mini, gpt-4o, deepseek-chat, llama3).';
+                    ToolTip = 'The model identifier (e.g., llama-3.3-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b-32768).';
                 }
                 field("API Key"; Rec."API Key")
                 {
                     ApplicationArea = All;
                     ExtendedDatatype = Masked;
-                    ToolTip = 'Your external AI API Key. It is masked for security.';
+                    ToolTip = 'Your Groq API Key (starts with gsk_...). It is masked for security.';
                 }
             }
         }

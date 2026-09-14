@@ -2,21 +2,21 @@ namespace DefaultPublisher.ALProject1;
 
 using Microsoft.Sales.Customer;
 
-pageextension 50100 CustomerListAIExt extends "Customer List"
+pageextension 50101 CustomerCardAIExt extends "Customer Card"
 {
     actions
     {
         addlast(processing)
         {
-            group(AIActions)
+            group(AICustomerCardGroup)
             {
                 Caption = 'AI Insights';
                 Image = Sparkle;
 
-                action(AskAIAboutCustomer)
+                action(AskAIOnCard)
                 {
                     Caption = 'Analyze with AI';
-                    ToolTip = 'Send customer details and financial balances to external AI for an executive summary.';
+                    ToolTip = 'Send customer financial metrics to external AI for instant executive summary and risk assessment.';
                     ApplicationArea = All;
                     Image = Sparkle;
                     Promoted = true;

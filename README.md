@@ -16,9 +16,16 @@ A Proof of Concept demonstrating native integration between **Microsoft Dynamics
 - **Editable Subject & Body**: Review and customize the generated email directly in Business Central before sending.
 - **1-Click Mail Client Integration**: Open the draft directly in Outlook or your default email client with recipient, subject, and body automatically populated.
 
-### 3. ⚙️ Universal AI Integration Engine
-- **Configurable Setup Page**: Set Endpoints, Model IDs (e.g. `gpt-oss-120b`, `llama-3.3-70b-versatile`), and API Keys without touching code.
-- **Reusable AL Codeunit**: `AIManagement.AskAI(Prompt)` and `AIManagement.GenerateCustomerEmail(...)` can be leveraged across any BC object.
+### 3. 💬 Floating In-App AI Onboarding & FAQ Bot Widget
+- **Website-Style Floating Chat Launcher**: Bottom-right 💬 trigger icon embedded directly on Business Central Role Centers.
+- **Interactive Multi-Turn Guidance**: Helps new employees navigate Business Central, find pages using Tell Me (`Alt+Q`), and learn company policies.
+- **One-Click FAQ Chips**: Instant guides for common procedures (e.g. Sales Invoices, Credit Limits, AI features).
+- **100% On-Premise Compatible**: Powered by native `ControlAddIn` (HTML5/CSS3/JS) and AL `HttpClient`.
+
+### 4. ⚙️ Universal AI Integration Engine
+- **Configurable Setup Page**: Set Endpoints, Model IDs (e.g. `gpt-oss-120b`, `llama-3.3-70b-versatile`, local Ollama), and API Keys without touching code.
+- **Timeout & Graceful Fallback**: 20-second connection timeout with `[TryFunction]` safety to guarantee seamless UX.
+- **Reusable AL Codeunit**: `AIManagement.AskAI(Prompt)`, `AskERPGuide(Question)`, and email generators reusable across any BC object.
 
 ---
 
@@ -26,11 +33,21 @@ A Proof of Concept demonstrating native integration between **Microsoft Dynamics
 
 ```text
 ALProject1/
-├── app.json                          # Extension manifest & runtime configuration
-├── AISetup.Table.al                  # Setup table for credentials & endpoint
-├── AISetup.Page.al                   # Setup card with connection test action
-├── AIManagement.Codeunit.al          # Universal HTTP/JSON AI service & email generator
-├── AICustomerAssistant.Page.al       # Interactive workspace with collapsible sections & email drafter
-├── CustomerCardAIExt.PageExt.al      # Customer Card extension linking to AI Assistant
-└── CustomerListAIExt.PageExt.al      # Customer List extension linking to AI Assistant
+├── app.json                                 # Extension manifest & runtime configuration
+├── AISetup.Table.al                         # Setup table for credentials & endpoint
+├── AISetup.Page.al                          # Setup card with connection test action
+├── AIManagement.Codeunit.al                 # Universal HTTP/JSON AI service & ERP guide
+├── AICustomerAssistant.Page.al              # Customer AI workspace & email drafter
+├── CustomerCardAIExt.PageExt.al             # Customer Card extension linking to AI Assistant
+├── CustomerListAIExt.PageExt.al             # Customer List extension linking to AI Assistant
+├── AIChatBot.CardPart.al                    # CardPart hosting the interactive chatbot
+├── BusinessManagerRoleCenterAIExt.PageExt.al# Embeds chatbot on Business Manager Role Center
+├── OrderProcessorRoleCenterAIExt.PageExt.al  # Embeds chatbot on Order Processor Role Center
+└── AIChatBot/
+    ├── AIChatBot.ControlAddIn.al            # AL Control Add-in definition
+    ├── scripts/
+    │   ├── startup.js                       # Startup initialization script
+    │   └── chatbot.js                       # Two-way chat UI, events, markdown parser
+    └── styles/
+        └── chatbot.css                      # Modern glassmorphism floating styles
 ```

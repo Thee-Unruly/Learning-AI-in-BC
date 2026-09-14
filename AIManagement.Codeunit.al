@@ -165,4 +165,32 @@ codeunit 50100 "AI Management"
     begin
         GenerateCustomerEmail(Cust, EmailObjective, AdditionalNotes, EmailSubject, EmailBody);
     end;
+
+    procedure AskERPGuide(UserQuestion: Text): Text
+    var
+        Prompt: Text;
+    begin
+        Prompt := StrSubstNo(
+            'You are an expert Onboarding & System Guide AI for Microsoft Dynamics 365 Business Central.\' +
+            'Provide clear, concise, and step-by-step instructions for the user.\' +
+            'Core System Knowledge:\' +
+            '- Global Search: Press Alt+Q (Tell Me) to search for any page, report, or task in Business Central.\' +
+            '- Sales Invoices / Orders: Located under Sales -> Sales Orders or Sales Invoices. Required fields: Customer No., Posting Date, Line items (Type, No., Quantity, Unit Price). Use "Post" (F9) or "Post and Send" to finalize.\' +
+            '- Customer Credit Limit & Block Policy: If a customer balance exceeds their credit limit, orders require Finance Manager approval. Customers can be set to Blocked (Ship/Invoice/All) on the Customer Card.\' +
+            '- Payment Terms: Standard terms are Net 30, COD, or 1M(8D). Checked against customer ledger entries and due dates.\' +
+            '- AI Customer Assistant Extension: Adds an "AI Insights" action on Customer Card and List to run executive risk analysis and draft context-aware outreach emails.\' +
+            '- AI Setup Page: Search "AI Setup" via Alt+Q to configure API Endpoint, Model, and API Key.\\' +
+            'User Question: %1\\' +
+            'Answer in a helpful, structured tone with numbered steps and bold UI terms.',
+            UserQuestion
+        );
+
+        exit(AskAI(Prompt));
+    end;
+
+    [TryFunction]
+    procedure TryAskERPGuide(UserQuestion: Text; var AnswerText: Text)
+    begin
+        AnswerText := AskERPGuide(UserQuestion);
+    end;
 }

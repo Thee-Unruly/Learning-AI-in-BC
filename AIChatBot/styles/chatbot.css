@@ -1,0 +1,393 @@
+/* Modern Glassmorphism Floating AI Chatbot for Business Central */
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap');
+
+:root {
+    --bc-ai-primary: #0078d4;
+    --bc-ai-primary-hover: #106ebe;
+    --bc-ai-gradient: linear-gradient(135deg, #0078d4 0%, #004e8c 50%, #5c2d91 100%);
+    --bc-ai-bg: rgba(255, 255, 255, 0.95);
+    --bc-ai-surface: #f3f6f9;
+    --bc-ai-border: rgba(0, 120, 212, 0.2);
+    --bc-ai-text-main: #1f2937;
+    --bc-ai-text-muted: #6b7280;
+    --bc-ai-bot-bubble: #ffffff;
+    --bc-ai-user-bubble: linear-gradient(135deg, #0078d4, #005a9e);
+    --bc-ai-shadow: 0 16px 36px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 120, 212, 0.15);
+}
+
+/* Floating Launcher Button */
+#ai-bot-launcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--bc-ai-gradient);
+    box-shadow: var(--bc-ai-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999999;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+#ai-bot-launcher:hover {
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 20px 40px rgba(0, 120, 212, 0.35);
+}
+
+#ai-bot-launcher .launcher-icon {
+    width: 28px;
+    height: 28px;
+    fill: #ffffff;
+    transition: transform 0.3s ease;
+}
+
+#ai-bot-launcher:hover .launcher-icon {
+    transform: rotate(10deg);
+}
+
+#ai-bot-launcher .launcher-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 14px;
+    height: 14px;
+    background: #107c41;
+    border: 2.5px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(16, 124, 65, 0.6);
+}
+
+/* Floating Chat Window */
+#ai-bot-window {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    width: 380px;
+    height: 540px;
+    max-height: calc(100vh - 120px);
+    background: var(--bc-ai-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--bc-ai-border);
+    border-radius: 16px;
+    box-shadow: var(--bc-ai-shadow);
+    display: flex;
+    flex-direction: column;
+    z-index: 999998;
+    overflow: hidden;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    transform-origin: bottom right;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 1;
+    transform: scale(1);
+}
+
+#ai-bot-window.hidden {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+    pointer-events: none;
+}
+
+/* Header */
+.ai-bot-header {
+    background: var(--bc-ai-gradient);
+    color: #ffffff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ai-bot-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ai-bot-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.ai-bot-title-group h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+.ai-bot-title-group p {
+    margin: 2px 0 0 0;
+    font-size: 11px;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-status-dot {
+    width: 7px;
+    height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.ai-bot-close-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    font-size: 16px;
+}
+
+.ai-bot-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Messages Area */
+.ai-bot-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--bc-ai-surface);
+}
+
+/* Welcome Box */
+.ai-welcome-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.ai-welcome-card h4 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-welcome-card p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--bc-ai-text-muted);
+}
+
+/* Quick FAQ Chips */
+.ai-faq-chips-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.ai-faq-chip {
+    background: #f0f7ff;
+    border: 1px solid #cce3f5;
+    color: #005a9e;
+    padding: 7px 11px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ai-faq-chip:hover {
+    background: #e0effe;
+    border-color: #0078d4;
+    transform: translateX(3px);
+}
+
+/* Message Bubbles */
+.ai-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    animation: fadeIn 0.25s ease forwards;
+}
+
+.ai-message.user {
+    align-self: flex-end;
+}
+
+.ai-message.bot {
+    align-self: flex-start;
+}
+
+.ai-bubble {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    word-break: break-word;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.ai-message.user .ai-bubble {
+    background: var(--bc-ai-user-bubble);
+    color: #ffffff;
+    border-bottom-right-radius: 2px;
+}
+
+.ai-message.bot .ai-bubble {
+    background: var(--bc-ai-bot-bubble);
+    color: var(--bc-ai-text-main);
+    border: 1px solid #e5e7eb;
+    border-bottom-left-radius: 2px;
+}
+
+.ai-bubble p {
+    margin: 0 0 6px 0;
+}
+
+.ai-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.ai-bubble ol, .ai-bubble ul {
+    margin: 4px 0 6px 18px;
+    padding: 0;
+}
+
+.ai-bubble li {
+    margin-bottom: 4px;
+}
+
+.ai-msg-time {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-top: 3px;
+    padding: 0 4px;
+}
+
+.ai-message.user .ai-msg-time {
+    text-align: right;
+}
+
+/* Typing Indicator */
+.ai-typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    width: fit-content;
+}
+
+.ai-typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #0078d4;
+    border-radius: 50%;
+    animation: pulse 1.2s infinite ease-in-out;
+}
+
+.ai-typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ai-typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* Footer / Input Area */
+.ai-bot-footer {
+    padding: 12px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-bot-input {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    padding: 9px 14px;
+    font-size: 12.5px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ai-bot-input:focus {
+    border-color: var(--bc-ai-primary);
+    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.18);
+}
+
+.ai-bot-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bc-ai-primary);
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.ai-bot-send-btn:hover {
+    background: var(--bc-ai-primary-hover);
+    transform: scale(1.05);
+}
+
+.ai-bot-send-btn:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.ai-bot-send-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: #ffffff;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+}

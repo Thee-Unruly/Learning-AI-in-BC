@@ -5,10 +5,12 @@ controladdin "AI Chat Bot Control"
     StartupScript = 'AIChatBot/scripts/startup.js';
     HorizontalStretch = true;
     VerticalStretch = true;
-    RequestedHeight = 1;
-    RequestedWidth = 1;
-    MinimumHeight = 0;
-    MinimumWidth = 0;
+    VerticalShrink = false;
+    HorizontalShrink = false;
+    RequestedHeight = 720;
+    MinimumHeight = 650;
+    RequestedWidth = 460;
+    MinimumWidth = 420;
 
     event ControlReady();
     event AskQuestion(Question: Text);

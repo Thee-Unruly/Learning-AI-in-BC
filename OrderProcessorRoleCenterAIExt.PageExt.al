@@ -11,7 +11,7 @@ pageextension 50103 OrderProcessorRoleCenterAIExt extends "Order Processor Role 
             part(AIChatBotWidget; "AI Chat Bot CardPart")
             {
                 ApplicationArea = All;
-                Caption = 'AI Guide';
+                Caption = 'Amira';
             }
         }
     }

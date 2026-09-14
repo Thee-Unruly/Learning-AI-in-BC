@@ -11,7 +11,7 @@ pageextension 50102 BusinessManagerRoleCenterAIExt extends "Business Manager Rol
             part(AIChatBotWidget; "AI Chat Bot CardPart")
             {
                 ApplicationArea = All;
-                Caption = 'AI Guide';
+                Caption = 'Amira';
             }
         }
     }

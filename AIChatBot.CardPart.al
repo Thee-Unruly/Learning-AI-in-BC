@@ -3,7 +3,7 @@ namespace DefaultPublisher.ALProject1;
 page 50103 "AI Chat Bot CardPart"
 {
     PageType = CardPart;
-    Caption = 'AI System Assistant Widget';
+    Caption = 'Amira - ERP Assistant';
     ApplicationArea = All;
     UsageCategory = None;
 

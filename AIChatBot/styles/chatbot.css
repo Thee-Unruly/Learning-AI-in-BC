@@ -1,18 +1,18 @@
-/* Modern Glassmorphism Floating AI Chatbot for Business Central */
+/* Amira - Modern Enterprise AI Chat Agent for Business Central */
 @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap');
 
 :root {
-    --bc-ai-primary: #0078d4;
-    --bc-ai-primary-hover: #106ebe;
-    --bc-ai-gradient: linear-gradient(135deg, #0078d4 0%, #004e8c 50%, #5c2d91 100%);
-    --bc-ai-bg: rgba(255, 255, 255, 0.95);
-    --bc-ai-surface: #f3f6f9;
-    --bc-ai-border: rgba(0, 120, 212, 0.2);
-    --bc-ai-text-main: #1f2937;
-    --bc-ai-text-muted: #6b7280;
-    --bc-ai-bot-bubble: #ffffff;
-    --bc-ai-user-bubble: linear-gradient(135deg, #0078d4, #005a9e);
-    --bc-ai-shadow: 0 16px 36px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 120, 212, 0.15);
+    --amira-primary: #00a4e4;
+    --amira-primary-dark: #008cc3;
+    --amira-primary-gradient: linear-gradient(135deg, #00a4e4 0%, #0077b5 100%);
+    --amira-bg: #ffffff;
+    --amira-surface: #f8fafc;
+    --amira-border: #e2e8f0;
+    --amira-text-main: #1e293b;
+    --amira-text-muted: #64748b;
+    --amira-user-bubble: #00a4e4;
+    --amira-bot-bubble: #ffffff;
+    --amira-shadow: 0 20px 48px rgba(0, 0, 0, 0.16), 0 8px 24px rgba(0, 164, 228, 0.18);
 }
 
 /* Floating Launcher Button */
@@ -20,133 +20,120 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    width: 58px;
-    height: 58px;
+    width: 62px;
+    height: 62px;
     border-radius: 50%;
-    background: var(--bc-ai-gradient);
-    box-shadow: var(--bc-ai-shadow);
+    background: var(--amira-primary);
+    box-shadow: var(--amira-shadow);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 999999;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 2px solid rgba(255, 255, 255, 0.35);
+    border: 3px solid #ffffff;
 }
 
 #ai-bot-launcher:hover {
     transform: translateY(-4px) scale(1.06);
-    box-shadow: 0 20px 40px rgba(0, 120, 212, 0.35);
+    box-shadow: 0 24px 50px rgba(0, 164, 228, 0.38);
 }
 
-#ai-bot-launcher .launcher-icon {
+#ai-bot-launcher svg {
     width: 28px;
     height: 28px;
     fill: #ffffff;
     transition: transform 0.3s ease;
 }
 
-#ai-bot-launcher:hover .launcher-icon {
-    transform: rotate(10deg);
+#ai-bot-launcher.active svg {
+    transform: rotate(180deg);
 }
 
 #ai-bot-launcher .launcher-badge {
     position: absolute;
-    top: -3px;
-    right: -3px;
-    width: 14px;
-    height: 14px;
+    top: -2px;
+    right: -2px;
+    width: 15px;
+    height: 15px;
     background: #107c41;
     border: 2.5px solid #ffffff;
     border-radius: 50%;
     box-shadow: 0 0 8px rgba(16, 124, 65, 0.6);
 }
 
-/* Floating Chat Window */
+/* Large Floating Chat Window */
 #ai-bot-window {
     position: fixed;
-    bottom: 92px;
+    bottom: 96px;
     right: 24px;
-    width: 380px;
-    height: 540px;
-    max-height: calc(100vh - 120px);
-    background: var(--bc-ai-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--bc-ai-border);
-    border-radius: 16px;
-    box-shadow: var(--bc-ai-shadow);
+    width: 440px;
+    height: 680px;
+    max-width: calc(100vw - 36px);
+    max-height: calc(100vh - 116px);
+    background: var(--amira-bg);
+    border: 1px solid var(--amira-border);
+    border-radius: 20px;
+    box-shadow: var(--amira-shadow);
     display: flex;
     flex-direction: column;
     z-index: 999998;
     overflow: hidden;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     transform-origin: bottom right;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     opacity: 1;
     transform: scale(1);
 }
 
 #ai-bot-window.hidden {
     opacity: 0;
-    transform: scale(0.85) translateY(20px);
+    transform: scale(0.9) translateY(30px);
     pointer-events: none;
 }
 
-/* Header */
-.ai-bot-header {
-    background: var(--bc-ai-gradient);
+/* Top Header Bar */
+.amira-header {
+    background: var(--amira-primary);
     color: #ffffff;
-    padding: 14px 18px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-.ai-bot-header-left {
+.amira-header-left {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.ai-bot-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.2);
+.amira-header-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 20px;
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+}
+
+.amira-header-title {
     font-size: 19px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-weight: 700;
+    letter-spacing: -0.3px;
 }
 
-.ai-bot-title-group h3 {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-}
-
-.ai-bot-title-group p {
-    margin: 2px 0 0 0;
-    font-size: 11px;
-    opacity: 0.85;
+.amira-header-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 10px;
 }
 
-.ai-status-dot {
-    width: 7px;
-    height: 7px;
-    background: #4ade80;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.ai-bot-close-btn {
+.amira-icon-btn {
     background: transparent;
     border: none;
     color: #ffffff;
@@ -156,238 +143,330 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
-    font-size: 16px;
+    transition: background 0.2s, transform 0.15s;
 }
 
-.ai-bot-close-btn:hover {
+.amira-icon-btn:hover {
     background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.08);
 }
 
-/* Messages Area */
-.ai-bot-messages {
+.amira-icon-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Messages / Chat Space */
+.amira-messages-area {
     flex: 1;
-    padding: 16px;
+    padding: 24px 20px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    background: var(--bc-ai-surface);
-}
-
-/* Welcome Box */
-.ai-welcome-card {
+    gap: 16px;
     background: #ffffff;
-    border-radius: 12px;
-    padding: 14px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
-.ai-welcome-card h4 {
-    margin: 0 0 6px 0;
-    font-size: 13px;
-    color: #111827;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.ai-welcome-card p {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.45;
-    color: var(--bc-ai-text-muted);
-}
-
-/* Quick FAQ Chips */
-.ai-faq-chips-container {
+/* Center Hero Section */
+.amira-hero-card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-top: 10px;
+    align-items: center;
+    text-align: center;
+    margin: 12px 0 20px 0;
+    animation: fadeIn 0.4s ease;
 }
 
-.ai-faq-chip {
-    background: #f0f7ff;
-    border: 1px solid #cce3f5;
-    color: #005a9e;
-    padding: 7px 11px;
-    border-radius: 8px;
-    font-size: 11.5px;
-    font-weight: 500;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.2s;
+.amira-hero-badge {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #008cc3 0%, #00a4e4 100%);
+    box-shadow: 0 10px 24px rgba(0, 164, 228, 0.28);
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    font-size: 44px;
+    color: #ffffff;
+    margin-bottom: 14px;
+    border: 3px solid #ffffff;
+    outline: 2px solid #e0f2fe;
 }
 
-.ai-faq-chip:hover {
-    background: #e0effe;
-    border-color: #0078d4;
-    transform: translateX(3px);
+.amira-hero-title {
+    font-size: 23px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.4px;
+}
+
+.amira-hero-subtitle {
+    font-size: 14px;
+    color: #475569;
+    margin: 0 0 18px 0;
+    line-height: 1.45;
+    max-width: 320px;
+}
+
+/* FAQ Suggestion Pills */
+.amira-faq-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.amira-faq-pill {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0284c7;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.amira-faq-pill:hover {
+    background: #e0f2fe;
+    border-color: #00a4e4;
+    color: #0369a1;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 164, 228, 0.12);
+}
+
+.amira-faq-pill span {
+    font-size: 17px;
+}
+
+/* Chat Status Separator */
+.amira-divider-status {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 11.5px;
+    font-weight: 500;
+    margin: 10px 0;
+}
+
+.amira-divider-status::before,
+.amira-divider-status::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.amira-divider-status:not(:empty)::before {
+    margin-right: 12px;
+}
+
+.amira-divider-status:not(:empty)::after {
+    margin-left: 12px;
 }
 
 /* Message Bubbles */
-.ai-message {
+.amira-msg {
     display: flex;
     flex-direction: column;
-    max-width: 85%;
+    max-width: 86%;
     animation: fadeIn 0.25s ease forwards;
 }
 
-.ai-message.user {
+.amira-msg.user {
     align-self: flex-end;
 }
 
-.ai-message.bot {
+.amira-msg.bot {
     align-self: flex-start;
 }
 
-.ai-bubble {
-    padding: 10px 14px;
-    border-radius: 12px;
-    font-size: 12.5px;
-    line-height: 1.5;
+.amira-bubble {
+    padding: 12px 18px;
+    border-radius: 16px;
+    font-size: 13.5px;
+    line-height: 1.55;
     word-break: break-word;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
-.ai-message.user .ai-bubble {
-    background: var(--bc-ai-user-bubble);
+.amira-msg.user .amira-bubble {
+    background: var(--amira-user-bubble);
     color: #ffffff;
-    border-bottom-right-radius: 2px;
+    border-radius: 18px 18px 4px 18px;
+    font-weight: 500;
 }
 
-.ai-message.bot .ai-bubble {
-    background: var(--bc-ai-bot-bubble);
-    color: var(--bc-ai-text-main);
-    border: 1px solid #e5e7eb;
-    border-bottom-left-radius: 2px;
+.amira-msg.bot .amira-bubble {
+    background: #f8fafc;
+    color: var(--amira-text-main);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px 18px 18px 4px;
 }
 
-.ai-bubble p {
-    margin: 0 0 6px 0;
+.amira-bubble p {
+    margin: 0 0 8px 0;
 }
 
-.ai-bubble p:last-child {
+.amira-bubble p:last-child {
     margin-bottom: 0;
 }
 
-.ai-bubble ol, .ai-bubble ul {
-    margin: 4px 0 6px 18px;
+.amira-bubble ol, .amira-bubble ul {
+    margin: 6px 0 8px 20px;
     padding: 0;
 }
 
-.ai-bubble li {
-    margin-bottom: 4px;
+.amira-bubble li {
+    margin-bottom: 6px;
 }
 
-.ai-msg-time {
-    font-size: 10px;
-    color: #9ca3af;
-    margin-top: 3px;
+.amira-msg-time {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
     padding: 0 4px;
 }
 
-.ai-message.user .ai-msg-time {
+.amira-msg.user .amira-msg-time {
     text-align: right;
 }
 
 /* Typing Indicator */
-.ai-typing-indicator {
+.amira-typing-box {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 10px 14px;
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
+    gap: 5px;
+    padding: 12px 18px;
+    background: #f8fafc;
+    border-radius: 16px 16px 16px 4px;
+    border: 1px solid #e2e8f0;
     width: fit-content;
 }
 
-.ai-typing-dot {
-    width: 6px;
-    height: 6px;
-    background: #0078d4;
+.amira-typing-dot {
+    width: 7px;
+    height: 7px;
+    background: #00a4e4;
     border-radius: 50%;
-    animation: pulse 1.2s infinite ease-in-out;
+    animation: amiraPulse 1.2s infinite ease-in-out;
 }
 
-.ai-typing-dot:nth-child(2) {
+.amira-typing-dot:nth-child(2) {
     animation-delay: 0.2s;
 }
 
-.ai-typing-dot:nth-child(3) {
+.amira-typing-dot:nth-child(3) {
     animation-delay: 0.4s;
 }
 
 /* Footer / Input Area */
-.ai-bot-footer {
-    padding: 12px;
+.amira-footer {
+    padding: 14px 18px;
     background: #ffffff;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.amira-input-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
-.ai-bot-input {
+.amira-input {
     flex: 1;
-    border: 1px solid #d1d5db;
-    border-radius: 20px;
-    padding: 9px 14px;
-    font-size: 12.5px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 24px;
+    padding: 11px 18px;
+    font-size: 13.5px;
     outline: none;
     font-family: inherit;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: all 0.2s ease;
+    background: #f8fafc;
 }
 
-.ai-bot-input:focus {
-    border-color: var(--bc-ai-primary);
-    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.18);
+.amira-input:focus {
+    border-color: var(--amira-primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 164, 228, 0.18);
 }
 
-.ai-bot-send-btn {
-    width: 36px;
-    height: 36px;
+.amira-send-btn {
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    background: var(--bc-ai-primary);
+    background: var(--amira-primary);
     border: none;
     color: #ffffff;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, transform 0.1s;
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 4px 10px rgba(0, 164, 228, 0.3);
 }
 
-.ai-bot-send-btn:hover {
-    background: var(--bc-ai-primary-hover);
-    transform: scale(1.05);
+.amira-send-btn:hover {
+    background: var(--amira-primary-dark);
+    transform: scale(1.06);
 }
 
-.ai-bot-send-btn:disabled {
-    background: #d1d5db;
+.amira-send-btn:disabled {
+    background: #cbd5e1;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
-.ai-bot-send-btn svg {
-    width: 16px;
-    height: 16px;
+.amira-send-btn svg {
+    width: 18px;
+    height: 18px;
     fill: #ffffff;
+}
+
+/* Start New Chat Button */
+.amira-start-btn {
+    width: 100%;
+    background: var(--amira-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 164, 228, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.amira-start-btn:hover {
+    background: var(--amira-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 164, 228, 0.35);
 }
 
 /* Animations */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse {
+@keyframes amiraPulse {
     0%, 100% { transform: scale(0.8); opacity: 0.5; }
-    50% { transform: scale(1.2); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 1; }
 }

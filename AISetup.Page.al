@@ -57,10 +57,17 @@ page 50100 "AI Setup"
                 var
                     AIMgmt: Codeunit "AI Management";
                     Response: Text;
+                    ProgressWindow: Dialog;
                 begin
                     CurrPage.SaveRecord();
-                    Response := AIMgmt.AskAI('Hello! In 1 short sentence, confirm you are connected to Microsoft Dynamics 365 Business Central.');
-                    Message('🤖 AI Connection Test Successful!\\Response:\%1', Response);
+                    ProgressWindow.Open('Testing AI API connection, please wait...');
+                    if AIMgmt.TryAskAI('Hello! In 1 short sentence, confirm you are connected to Microsoft Dynamics 365 Business Central.', Response) then begin
+                        ProgressWindow.Close();
+                        Message('🤖 AI Connection Test Successful!\\Response:\%1', Response);
+                    end else begin
+                        ProgressWindow.Close();
+                        Message('❌ AI Connection Test Failed!\\Error Details:\%1\\Please check your API Endpoint, API Key, and network settings.', GetLastErrorText());
+                    end;
                 end;
             }
         }

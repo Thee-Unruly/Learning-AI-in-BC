@@ -16,7 +16,6 @@ page 50102 "AI Customer Assistant"
             group(CustomerOverview)
             {
                 Caption = 'Customer Overview';
-                Collapsible = true;
 
                 grid(HeaderGrid)
                 {
@@ -88,7 +87,6 @@ page 50102 "AI Customer Assistant"
             group(AccountAnalysisSection)
             {
                 Caption = 'Account Health & Assessment';
-                Collapsible = true;
 
                 field(AIAnalysisField; AIAnalysisSummary)
                 {
@@ -104,7 +102,6 @@ page 50102 "AI Customer Assistant"
             group(EmailDraftingSection)
             {
                 Caption = 'Personalized Email Drafter';
-                Collapsible = true;
 
                 group(EmailParameters)
                 {
@@ -178,11 +175,26 @@ page 50102 "AI Customer Assistant"
                 trigger OnAction()
                 var
                     AIMgmt: Codeunit "AI Management";
+                    ProgressWindow: Dialog;
                 begin
                     if EmailObjectiveText = '' then
                         EmailObjectiveText := 'Partnership check-in and exploring new business synergies';
 
-                    AIMgmt.GenerateCustomerEmail(CustomerRecord, EmailObjectiveText, AdditionalNotesText, EmailSubjectText, EmailBodyText);
+                    ProgressWindow.Open('Drafting personalized email with AI, please wait...');
+                    if not AIMgmt.TryGenerateCustomerEmail(CustomerRecord, EmailObjectiveText, AdditionalNotesText, EmailSubjectText, EmailBodyText) then begin
+                        ProgressWindow.Close();
+                        EmailSubjectText := StrSubstNo('Partnership Check-in: %1', CustomerRecord.Name);
+                        EmailBodyText := StrSubstNo(
+                            '⚠️ AI Email Drafting Failed\' +
+                            'Reason: %1\\' +
+                            'Please check your network connection and AI Setup configuration, then click "Draft Email with AI" to retry.',
+                            GetLastErrorText()
+                        );
+                        Message('⚠️ AI draft failed: %1', GetLastErrorText());
+                        exit;
+                    end;
+                    ProgressWindow.Close();
+
                     Message('Email draft generated successfully! You can review or edit below, then click "Open in Mail Client".');
                 end;
             }
@@ -236,7 +248,10 @@ page 50102 "AI Customer Assistant"
     var
         AIMgmt: Codeunit "AI Management";
         Prompt: Text;
+        ProgressWindow: Dialog;
     begin
+        ProgressWindow.Open('Evaluating customer account with AI, please wait...');
+
         Prompt := StrSubstNo(
             'Analyze this customer account in Microsoft Dynamics 365 Business Central:\' +
             'Company: %1 (%2)\' +
@@ -258,21 +273,39 @@ page 50102 "AI Customer Assistant"
             CustomerRecord."Payment Terms Code"
         );
 
-        AIAnalysisSummary := AIMgmt.AskAI(Prompt);
+        if not AIMgmt.TryAskAI(Prompt, AIAnalysisSummary) then begin
+            ProgressWindow.Close();
+            AIAnalysisSummary := StrSubstNo(
+                '⚠️ AI Account Evaluation Unavailable\' +
+                'Reason: %1\\' +
+                'Troubleshooting:\' +
+                '1. Verify API Endpoint and Key in the "AI Setup" page.\' +
+                '2. Ensure "Allow HttpClient Requests" is enabled under Extension Management.\' +
+                '3. Click "Re-Analyze Account" above to retry.',
+                GetLastErrorText()
+            );
+            exit;
+        end;
+
+        ProgressWindow.Close();
     end;
 
     local procedure UrlEscape(InputString: Text): Text
     var
+        CR: Char;
+        LF: Char;
         Result: Text;
     begin
+        CR := 13;
+        LF := 10;
         Result := InputString.Replace('&', '%26');
         Result := Result.Replace('?', '%3F');
         Result := Result.Replace('=', '%3D');
         Result := Result.Replace('#', '%23');
         Result := Result.Replace('+', '%2B');
         Result := Result.Replace(' ', '%20');
-        Result := Result.Replace(Chr(13) + Chr(10), '%0D%0A');
-        Result := Result.Replace(Chr(10), '%0A');
+        Result := Result.Replace(Format(CR) + Format(LF), '%0D%0A');
+        Result := Result.Replace(Format(LF), '%0A');
         Result := Result.Replace('\', '%0D%0A');
         exit(Result);
     end;

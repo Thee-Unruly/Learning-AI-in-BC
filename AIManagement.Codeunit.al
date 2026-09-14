@@ -59,9 +59,12 @@ codeunit 50100 "AI Management"
         if AISetup."API Key" <> '' then
             RequestHeaders.Add('Authorization', StrSubstNo('Bearer %1', AISetup."API Key"));
 
+        // 20-second timeout to prevent indefinite hanging
+        Client.Timeout(20000);
+
         // Send HTTP Request
         if not Client.Send(RequestMessage, ResponseMessage) then
-            Error('Could not connect to AI API endpoint: %1\\Ensure that "Allow HttpClient Requests" is enabled for this extension under Extension Management in Business Central.', AISetup."API Endpoint");
+            Error('Could not connect to AI API endpoint: %1\\Ensure that the network is reachable and "Allow HttpClient Requests" is enabled for this extension under Extension Management in Business Central.', AISetup."API Endpoint");
 
         ResponseMessage.Content.ReadAs(ResponseText);
 
@@ -131,9 +134,9 @@ codeunit 50100 "AI Management"
 
         if (SubjectPos > 0) and (BodyPos > SubjectPos) then begin
             EmailSubject := CopyStr(RawResponse, SubjectPos + 8, BodyPos - (SubjectPos + 8));
-            EmailSubject := DelChr(EmailSubject, '<>', ' ' + Chr(13) + Chr(10));
+            EmailSubject := EmailSubject.Trim();
             EmailBody := CopyStr(RawResponse, BodyPos + 5);
-            EmailBody := DelChr(EmailBody, '<>', ' ' + Chr(13) + Chr(10));
+            EmailBody := EmailBody.Trim();
         end else begin
             EmailSubject := StrSubstNo('Partnership & Account Discussion: %1', Cust.Name);
             EmailBody := RawResponse;
@@ -149,5 +152,17 @@ codeunit 50100 "AI Management"
         Cleaned := Cleaned.Replace('## ', '');
         Cleaned := Cleaned.Replace('# ', '');
         exit(Cleaned);
+    end;
+
+    [TryFunction]
+    procedure TryAskAI(UserPrompt: Text; var AnswerText: Text)
+    begin
+        AnswerText := AskAI(UserPrompt);
+    end;
+
+    [TryFunction]
+    procedure TryGenerateCustomerEmail(Cust: Record Customer; EmailObjective: Text; AdditionalNotes: Text; var EmailSubject: Text; var EmailBody: Text)
+    begin
+        GenerateCustomerEmail(Cust, EmailObjective, AdditionalNotes, EmailSubject, EmailBody);
     end;
 }

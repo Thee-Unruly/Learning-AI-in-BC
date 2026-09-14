@@ -4,6 +4,545 @@
     let isOpen = false;
     let nudgeTimeout = null;
 
+    const amiraCSS = `
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap');
+
+        :root {
+            --amira-primary: #00a4e4;
+            --amira-primary-dark: #008cc3;
+            --amira-primary-gradient: linear-gradient(135deg, #00a4e4 0%, #0077b5 100%);
+            --amira-bg: #ffffff;
+            --amira-surface: #f8fafc;
+            --amira-border: #e2e8f0;
+            --amira-text-main: #1e293b;
+            --amira-text-muted: #64748b;
+            --amira-user-bubble: #00a4e4;
+            --amira-bot-bubble: #f8fafc;
+            --amira-shadow: 0 20px 48px rgba(0, 0, 0, 0.16), 0 8px 24px rgba(0, 164, 228, 0.18);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Floating Launcher Button */
+        #ai-bot-launcher {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            width: 62px !important;
+            height: 62px !important;
+            border-radius: 50% !important;
+            background: #00a4e4 !important;
+            box-shadow: 0 12px 32px rgba(0, 164, 228, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            z-index: 2147483647 !important;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            border: 3px solid #ffffff !important;
+            box-sizing: border-box !important;
+        }
+
+        #ai-bot-launcher:hover {
+            transform: translateY(-4px) scale(1.06) !important;
+            box-shadow: 0 18px 40px rgba(0, 164, 228, 0.45) !important;
+        }
+
+        #ai-bot-launcher svg {
+            width: 28px !important;
+            height: 28px !important;
+            fill: #ffffff !important;
+            transition: transform 0.3s ease !important;
+        }
+
+        #ai-bot-launcher .launcher-badge {
+            position: absolute !important;
+            top: -2px !important;
+            right: -2px !important;
+            width: 15px !important;
+            height: 15px !important;
+            background: #107c41 !important;
+            border: 2.5px solid #ffffff !important;
+            border-radius: 50% !important;
+            box-shadow: 0 0 8px rgba(16, 124, 65, 0.6) !important;
+        }
+
+        /* Amira Floating Nudge Toast */
+        .amira-nudge-toast {
+            position: fixed !important;
+            bottom: 96px !important;
+            right: 24px !important;
+            background: #ffffff !important;
+            border: 1.5px solid #bae6fd !important;
+            border-radius: 16px !important;
+            padding: 12px 16px !important;
+            box-shadow: 0 16px 36px rgba(0, 164, 228, 0.22), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            max-width: 330px !important;
+            z-index: 2147483646 !important;
+            cursor: pointer !important;
+            animation: amiraNudgeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1), amiraNudgeFloat 3s ease-in-out infinite alternate 0.5s !important;
+            transition: all 0.25s ease !important;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            box-sizing: border-box !important;
+        }
+
+        .amira-nudge-toast:hover {
+            transform: translateY(-3px) scale(1.02) !important;
+            border-color: #00a4e4 !important;
+            box-shadow: 0 18px 40px rgba(0, 164, 228, 0.32) !important;
+        }
+
+        .amira-nudge-avatar {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, #008cc3, #00a4e4) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 20px !important;
+            flex-shrink: 0 !important;
+            box-shadow: 0 4px 10px rgba(0, 164, 228, 0.3) !important;
+        }
+
+        .amira-nudge-text {
+            flex: 1 !important;
+        }
+
+        .amira-nudge-text strong {
+            display: block !important;
+            font-size: 13px !important;
+            color: #0f172a !important;
+            margin-bottom: 2px !important;
+            font-weight: 700 !important;
+        }
+
+        .amira-nudge-text p {
+            margin: 0 !important;
+            font-size: 11.5px !important;
+            color: #475569 !important;
+            line-height: 1.35 !important;
+        }
+
+        .amira-nudge-close {
+            background: transparent !important;
+            border: none !important;
+            color: #94a3b8 !important;
+            font-size: 14px !important;
+            cursor: pointer !important;
+            padding: 4px !important;
+            border-radius: 6px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s !important;
+        }
+
+        .amira-nudge-close:hover {
+            color: #0f172a !important;
+            background: #f1f5f9 !important;
+        }
+
+        /* Large Floating Chat Window */
+        #ai-bot-window {
+            position: fixed !important;
+            bottom: 96px !important;
+            right: 24px !important;
+            width: 440px !important;
+            height: 680px !important;
+            max-width: calc(100vw - 36px) !important;
+            max-height: calc(100vh - 116px) !important;
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 20px !important;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 164, 228, 0.2) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            z-index: 2147483646 !important;
+            overflow: hidden !important;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+            transform-origin: bottom right !important;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Top Header Bar */
+        .amira-header {
+            background: #00a4e4 !important;
+            color: #ffffff !important;
+            padding: 16px 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+            flex-shrink: 0 !important;
+        }
+
+        .amira-header-left {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+        }
+
+        .amira-header-avatar {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.25) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 20px !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+        }
+
+        .amira-header-title {
+            font-size: 19px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.3px !important;
+            color: #ffffff !important;
+        }
+
+        .amira-header-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+
+        .amira-icon-btn {
+            background: transparent !important;
+            border: none !important;
+            color: #ffffff !important;
+            cursor: pointer !important;
+            padding: 6px !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: background 0.2s, transform 0.15s !important;
+        }
+
+        .amira-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(1.08) !important;
+        }
+
+        .amira-icon-btn svg {
+            width: 20px !important;
+            height: 20px !important;
+            fill: #ffffff !important;
+        }
+
+        /* Messages / Chat Space */
+        .amira-messages-area {
+            flex: 1 !important;
+            padding: 24px 20px !important;
+            overflow-y: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Center Hero Section */
+        .amira-hero-card {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            margin: 10px 0 16px 0 !important;
+            animation: amiraFadeIn 0.4s ease !important;
+        }
+
+        .amira-hero-badge {
+            width: 88px !important;
+            height: 88px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, #008cc3 0%, #00a4e4 100%) !important;
+            box-shadow: 0 10px 24px rgba(0, 164, 228, 0.28) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 42px !important;
+            color: #ffffff !important;
+            margin-bottom: 12px !important;
+            border: 3px solid #ffffff !important;
+            outline: 2px solid #e0f2fe !important;
+        }
+
+        .amira-hero-title {
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
+            margin: 0 0 4px 0 !important;
+            letter-spacing: -0.4px !important;
+        }
+
+        .amira-hero-subtitle {
+            font-size: 13.5px !important;
+            color: #475569 !important;
+            margin: 0 0 16px 0 !important;
+            line-height: 1.45 !important;
+            max-width: 320px !important;
+        }
+
+        /* FAQ Suggestion Pills */
+        .amira-faq-pills {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            width: 100% !important;
+            margin-top: 4px !important;
+        }
+
+        .amira-faq-pill {
+            background: #f0f9ff !important;
+            border: 1px solid #bae6fd !important;
+            color: #0284c7 !important;
+            padding: 11px 16px !important;
+            border-radius: 12px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            text-align: left !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            font-family: inherit !important;
+            box-sizing: border-box !important;
+        }
+
+        .amira-faq-pill:hover {
+            background: #e0f2fe !important;
+            border-color: #00a4e4 !important;
+            color: #0369a1 !important;
+            transform: translateX(4px) !important;
+            box-shadow: 0 4px 12px rgba(0, 164, 228, 0.12) !important;
+        }
+
+        .amira-faq-pill span {
+            font-size: 17px !important;
+        }
+
+        /* Message Bubbles */
+        .amira-msg {
+            display: flex !important;
+            flex-direction: column !important;
+            max-width: 86% !important;
+            animation: amiraFadeIn 0.25s ease forwards !important;
+        }
+
+        .amira-msg.user {
+            align-self: flex-end !important;
+        }
+
+        .amira-msg.bot {
+            align-self: flex-start !important;
+        }
+
+        .amira-bubble {
+            padding: 12px 18px !important;
+            border-radius: 16px !important;
+            font-size: 13.5px !important;
+            line-height: 1.55 !important;
+            word-break: break-word !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+        }
+
+        .amira-msg.user .amira-bubble {
+            background: #00a4e4 !important;
+            color: #ffffff !important;
+            border-radius: 18px 18px 4px 18px !important;
+            font-weight: 500 !important;
+        }
+
+        .amira-msg.bot .amira-bubble {
+            background: #f8fafc !important;
+            color: #1e293b !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 18px 18px 18px 4px !important;
+        }
+
+        .amira-bubble p {
+            margin: 0 0 8px 0 !important;
+        }
+
+        .amira-bubble p:last-child {
+            margin-bottom: 0 !important;
+        }
+
+        .amira-bubble ol, .amira-bubble ul {
+            margin: 6px 0 8px 20px !important;
+            padding: 0 !important;
+        }
+
+        .amira-bubble li {
+            margin-bottom: 6px !important;
+        }
+
+        .amira-msg-time {
+            font-size: 11px !important;
+            color: #94a3b8 !important;
+            margin-top: 4px !important;
+            padding: 0 4px !important;
+        }
+
+        .amira-msg.user .amira-msg-time {
+            text-align: right !important;
+        }
+
+        /* Typing Indicator */
+        .amira-typing-box {
+            display: flex !important;
+            align-items: center !important;
+            gap: 5px !important;
+            padding: 12px 18px !important;
+            background: #f8fafc !important;
+            border-radius: 16px 16px 16px 4px !important;
+            border: 1px solid #e2e8f0 !important;
+            width: fit-content !important;
+        }
+
+        .amira-typing-dot {
+            width: 7px !important;
+            height: 7px !important;
+            background: #00a4e4 !important;
+            border-radius: 50% !important;
+            animation: amiraPulse 1.2s infinite ease-in-out !important;
+        }
+
+        .amira-typing-dot:nth-child(2) {
+            animation-delay: 0.2s !important;
+        }
+
+        .amira-typing-dot:nth-child(3) {
+            animation-delay: 0.4s !important;
+        }
+
+        /* Footer / Input Area */
+        .amira-footer {
+            padding: 14px 18px !important;
+            background: #ffffff !important;
+            border-top: 1px solid #f1f5f9 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            flex-shrink: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .amira-input-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+
+        .amira-input {
+            flex: 1 !important;
+            border: 1.5px solid #cbd5e1 !important;
+            border-radius: 24px !important;
+            padding: 11px 18px !important;
+            font-size: 13.5px !important;
+            outline: none !important;
+            font-family: inherit !important;
+            transition: all 0.2s ease !important;
+            background: #f8fafc !important;
+            box-sizing: border-box !important;
+        }
+
+        .amira-input:focus {
+            border-color: #00a4e4 !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(0, 164, 228, 0.18) !important;
+        }
+
+        .amira-send-btn {
+            width: 42px !important;
+            height: 42px !important;
+            border-radius: 50% !important;
+            background: #00a4e4 !important;
+            border: none !important;
+            color: #ffffff !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: background 0.2s, transform 0.15s !important;
+            box-shadow: 0 4px 10px rgba(0, 164, 228, 0.3) !important;
+            flex-shrink: 0 !important;
+        }
+
+        .amira-send-btn:hover {
+            background: #008cc3 !important;
+            transform: scale(1.06) !important;
+        }
+
+        .amira-send-btn:disabled {
+            background: #cbd5e1 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .amira-send-btn svg {
+            width: 18px !important;
+            height: 18px !important;
+            fill: #ffffff !important;
+        }
+
+        /* Custom Scrollbar */
+        .amira-messages-area::-webkit-scrollbar {
+            width: 6px !important;
+        }
+
+        .amira-messages-area::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+
+        .amira-messages-area::-webkit-scrollbar-thumb {
+            background: #cbd5e1 !important;
+            border-radius: 10px !important;
+        }
+
+        .amira-messages-area::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8 !important;
+        }
+
+        /* Keyframes */
+        @keyframes amiraFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes amiraPulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.25); opacity: 1; }
+        }
+
+        @keyframes amiraNudgeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(25px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes amiraNudgeFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-4px); }
+        }
+    `;
+
     function getTargetDocument() {
         try {
             if (window.parent && window.parent.document && window.parent.document.body) {
@@ -15,26 +554,20 @@
         return document;
     }
 
-    function ensureStylesInTargetDoc(targetDoc) {
-        if (targetDoc === document) return;
+    function injectStyles(targetDoc) {
         if (targetDoc.getElementById('amira-injected-styles')) return;
-
-        // Clone current stylesheet into parent head so styles apply everywhere
-        const currentStyle = document.querySelector('link[rel="stylesheet"], style');
-        if (currentStyle) {
-            const newStyle = targetDoc.createElement('link');
-            newStyle.id = 'amira-injected-styles';
-            newStyle.rel = 'stylesheet';
-            newStyle.href = currentStyle.href;
-            targetDoc.head.appendChild(newStyle);
-        }
+        const styleEl = targetDoc.createElement('style');
+        styleEl.id = 'amira-injected-styles';
+        styleEl.textContent = amiraCSS;
+        (targetDoc.head || targetDoc.body).appendChild(styleEl);
     }
 
     window.initAIChatBot = function () {
         const targetDoc = getTargetDocument();
         if (chatInitialized || targetDoc.getElementById('ai-bot-launcher')) return;
         chatInitialized = true;
-        ensureStylesInTargetDoc(targetDoc);
+        injectStyles(targetDoc);
+        injectStyles(document); // Also inject locally just in case
 
         // Create Launcher Button
         const launcher = targetDoc.createElement('div');
@@ -44,7 +577,7 @@
             <svg id="launcher-icon-chat" viewBox="0 0 24 24">
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.1 21.9a1 1 0 0 0 1.258 1.258L8 21.862A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
             </svg>
-            <svg id="launcher-icon-close" style="display: none;" viewBox="0 0 24 24">
+            <svg id="launcher-icon-close" class="hidden" viewBox="0 0 24 24">
                 <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
             </svg>
             <span class="launcher-badge"></span>
@@ -76,7 +609,7 @@
                     <div class="amira-header-title">Amira</div>
                 </div>
                 <div class="amira-header-actions">
-                    <button id="amira-sound-btn" class="amira-icon-btn" title="Toggle Voice / Audio">
+                    <button id="amira-sound-btn" class="amira-icon-btn" title="Voice Audio">
                         <svg viewBox="0 0 24 24">
                             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                         </svg>
@@ -198,14 +731,14 @@
         if (isOpen) {
             dismissNudge();
             launcher.title = 'Close chat agent';
-            if (iconChat) iconChat.style.display = 'none';
-            if (iconClose) iconClose.style.display = 'block';
+            if (iconChat) iconChat.classList.add('hidden');
+            if (iconClose) iconClose.classList.remove('hidden');
             const inputField = targetDoc.getElementById('amira-input');
             if (inputField) inputField.focus();
         } else {
             launcher.title = 'Ask Amira - ERP Assistant';
-            if (iconChat) iconChat.style.display = 'block';
-            if (iconClose) iconClose.style.display = 'none';
+            if (iconChat) iconChat.classList.remove('hidden');
+            if (iconClose) iconClose.classList.add('hidden');
         }
     }
 

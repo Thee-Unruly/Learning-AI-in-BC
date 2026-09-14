@@ -6,7 +6,7 @@ pageextension 50102 BusinessManagerRoleCenterAIExt extends "Business Manager Rol
 {
     layout
     {
-        addlast(rolecenter)
+        addfirst(rolecenter)
         {
             part(AIChatBotWidget; "AI Chat Bot CardPart")
             {

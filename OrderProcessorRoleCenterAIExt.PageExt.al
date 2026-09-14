@@ -6,7 +6,7 @@ pageextension 50103 OrderProcessorRoleCenterAIExt extends "Order Processor Role 
 {
     layout
     {
-        addlast(rolecenter)
+        addfirst(rolecenter)
         {
             part(AIChatBotWidget; "AI Chat Bot CardPart")
             {

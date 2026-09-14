@@ -2,13 +2,42 @@
     let chatInitialized = false;
     let isWaitingForResponse = false;
     let isOpen = false;
+    let nudgeTimeout = null;
+
+    function getTargetDocument() {
+        try {
+            if (window.parent && window.parent.document && window.parent.document.body) {
+                return window.parent.document;
+            }
+        } catch (e) {
+            // Cross-origin fallback
+        }
+        return document;
+    }
+
+    function ensureStylesInTargetDoc(targetDoc) {
+        if (targetDoc === document) return;
+        if (targetDoc.getElementById('amira-injected-styles')) return;
+
+        // Clone current stylesheet into parent head so styles apply everywhere
+        const currentStyle = document.querySelector('link[rel="stylesheet"], style');
+        if (currentStyle) {
+            const newStyle = targetDoc.createElement('link');
+            newStyle.id = 'amira-injected-styles';
+            newStyle.rel = 'stylesheet';
+            newStyle.href = currentStyle.href;
+            targetDoc.head.appendChild(newStyle);
+        }
+    }
 
     window.initAIChatBot = function () {
-        if (chatInitialized || document.getElementById('ai-bot-launcher')) return;
+        const targetDoc = getTargetDocument();
+        if (chatInitialized || targetDoc.getElementById('ai-bot-launcher')) return;
         chatInitialized = true;
+        ensureStylesInTargetDoc(targetDoc);
 
         // Create Launcher Button
-        const launcher = document.createElement('div');
+        const launcher = targetDoc.createElement('div');
         launcher.id = 'ai-bot-launcher';
         launcher.title = 'Ask Amira - ERP Assistant';
         launcher.innerHTML = `
@@ -20,10 +49,24 @@
             </svg>
             <span class="launcher-badge"></span>
         `;
-        document.body.appendChild(launcher);
+        targetDoc.body.appendChild(launcher);
+
+        // Create Nudge Toast
+        const nudgeToast = targetDoc.createElement('div');
+        nudgeToast.id = 'amira-nudge-toast';
+        nudgeToast.className = 'amira-nudge-toast hidden';
+        nudgeToast.innerHTML = `
+            <div class="amira-nudge-avatar">👋</div>
+            <div class="amira-nudge-text">
+                <strong>Hi, I'm Amira!</strong>
+                <p>Your ERP Assistant — click here if you need any help navigating Business Central.</p>
+            </div>
+            <button id="amira-nudge-close-btn" class="amira-nudge-close" title="Dismiss">✕</button>
+        `;
+        targetDoc.body.appendChild(nudgeToast);
 
         // Create Chat Window
-        const chatWindow = document.createElement('div');
+        const chatWindow = targetDoc.createElement('div');
         chatWindow.id = 'ai-bot-window';
         chatWindow.className = 'hidden';
         chatWindow.innerHTML = `
@@ -82,15 +125,33 @@
                 </div>
             </div>
         `;
-        document.body.appendChild(chatWindow);
+        targetDoc.body.appendChild(chatWindow);
+
+        // Show Nudge Toast after 2.5 seconds
+        nudgeTimeout = setTimeout(function () {
+            if (!isOpen && nudgeToast) {
+                nudgeToast.classList.remove('hidden');
+            }
+        }, 2500);
 
         // Event Listeners
         launcher.addEventListener('click', toggleChat);
-        document.getElementById('amira-close-btn').addEventListener('click', toggleChat);
-        document.getElementById('amira-reset-btn').addEventListener('click', resetChat);
+        targetDoc.getElementById('amira-close-btn').addEventListener('click', toggleChat);
+        targetDoc.getElementById('amira-reset-btn').addEventListener('click', resetChat);
 
-        const inputField = document.getElementById('amira-input');
-        const sendBtn = document.getElementById('amira-send-btn');
+        // Nudge click opens chat
+        nudgeToast.addEventListener('click', function (e) {
+            if (e.target.id === 'amira-nudge-close-btn') {
+                e.stopPropagation();
+                dismissNudge();
+                return;
+            }
+            dismissNudge();
+            if (!isOpen) toggleChat();
+        });
+
+        const inputField = targetDoc.getElementById('amira-input');
+        const sendBtn = targetDoc.getElementById('amira-send-btn');
 
         sendBtn.addEventListener('click', handleUserSend);
         inputField.addEventListener('keydown', function (e) {
@@ -111,21 +172,35 @@
         });
     };
 
+    function dismissNudge() {
+        const targetDoc = getTargetDocument();
+        const nudgeToast = targetDoc.getElementById('amira-nudge-toast');
+        if (nudgeToast) {
+            nudgeToast.classList.add('hidden');
+        }
+        if (nudgeTimeout) {
+            clearTimeout(nudgeTimeout);
+            nudgeTimeout = null;
+        }
+    }
+
     function toggleChat() {
-        const chatWindow = document.getElementById('ai-bot-window');
-        const launcher = document.getElementById('ai-bot-launcher');
-        const iconChat = document.getElementById('launcher-icon-chat');
-        const iconClose = document.getElementById('launcher-icon-close');
+        const targetDoc = getTargetDocument();
+        const chatWindow = targetDoc.getElementById('ai-bot-window');
+        const launcher = targetDoc.getElementById('ai-bot-launcher');
+        const iconChat = targetDoc.getElementById('launcher-icon-chat');
+        const iconClose = targetDoc.getElementById('launcher-icon-close');
         if (!chatWindow) return;
 
         isOpen = !isOpen;
         chatWindow.classList.toggle('hidden', !isOpen);
 
         if (isOpen) {
+            dismissNudge();
             launcher.title = 'Close chat agent';
             if (iconChat) iconChat.style.display = 'none';
             if (iconClose) iconClose.style.display = 'block';
-            const inputField = document.getElementById('amira-input');
+            const inputField = targetDoc.getElementById('amira-input');
             if (inputField) inputField.focus();
         } else {
             launcher.title = 'Ask Amira - ERP Assistant';
@@ -135,7 +210,8 @@
     }
 
     function resetChat() {
-        const messagesArea = document.getElementById('amira-messages-area');
+        const targetDoc = getTargetDocument();
+        const messagesArea = targetDoc.getElementById('amira-messages-area');
         if (!messagesArea) return;
         messagesArea.innerHTML = `
             <div id="amira-hero" class="amira-hero-card">
@@ -158,19 +234,20 @@
                 </div>
             </div>
         `;
-        const inputField = document.getElementById('amira-input');
+        const inputField = targetDoc.getElementById('amira-input');
         if (inputField) {
             inputField.disabled = false;
             inputField.value = '';
             inputField.focus();
         }
-        const sendBtn = document.getElementById('amira-send-btn');
+        const sendBtn = targetDoc.getElementById('amira-send-btn');
         if (sendBtn) sendBtn.disabled = false;
         isWaitingForResponse = false;
     }
 
     function handleUserSend() {
-        const inputField = document.getElementById('amira-input');
+        const targetDoc = getTargetDocument();
+        const inputField = targetDoc.getElementById('amira-input');
         const text = inputField.value.trim();
         if (!text || isWaitingForResponse) return;
         inputField.value = '';
@@ -179,13 +256,12 @@
 
     function sendQuestion(questionText) {
         isWaitingForResponse = true;
-
-        // Hide the hero card after first interaction if desired, or keep it as top context
         appendMessage('user', questionText);
         showTypingIndicator();
 
-        const inputField = document.getElementById('amira-input');
-        const sendBtn = document.getElementById('amira-send-btn');
+        const targetDoc = getTargetDocument();
+        const inputField = targetDoc.getElementById('amira-input');
+        const sendBtn = targetDoc.getElementById('amira-send-btn');
         if (inputField) inputField.disabled = true;
         if (sendBtn) sendBtn.disabled = true;
 
@@ -199,10 +275,11 @@
     }
 
     function appendMessage(sender, text) {
-        const messagesArea = document.getElementById('amira-messages-area');
+        const targetDoc = getTargetDocument();
+        const messagesArea = targetDoc.getElementById('amira-messages-area');
         if (!messagesArea) return;
 
-        const msgDiv = document.createElement('div');
+        const msgDiv = targetDoc.createElement('div');
         msgDiv.className = `amira-msg ${sender}`;
 
         const formattedContent = formatMarkdown(text);
@@ -219,10 +296,11 @@
 
     function showTypingIndicator() {
         removeTypingIndicator();
-        const messagesArea = document.getElementById('amira-messages-area');
+        const targetDoc = getTargetDocument();
+        const messagesArea = targetDoc.getElementById('amira-messages-area');
         if (!messagesArea) return;
 
-        const typingDiv = document.createElement('div');
+        const typingDiv = targetDoc.createElement('div');
         typingDiv.id = 'amira-typing-box';
         typingDiv.className = 'amira-typing-box';
         typingDiv.innerHTML = `
@@ -235,7 +313,8 @@
     }
 
     function removeTypingIndicator() {
-        const indicator = document.getElementById('amira-typing-box');
+        const targetDoc = getTargetDocument();
+        const indicator = targetDoc.getElementById('amira-typing-box');
         if (indicator) indicator.remove();
     }
 
@@ -260,8 +339,9 @@
         removeTypingIndicator();
         appendMessage('bot', answerText);
 
-        const inputField = document.getElementById('amira-input');
-        const sendBtn = document.getElementById('amira-send-btn');
+        const targetDoc = getTargetDocument();
+        const inputField = targetDoc.getElementById('amira-input');
+        const sendBtn = targetDoc.getElementById('amira-send-btn');
         if (inputField) {
             inputField.disabled = false;
             inputField.focus();
@@ -274,8 +354,9 @@
         removeTypingIndicator();
         appendMessage('bot', `⚠️ **Amira says:** ${errorMsg || 'Could not communicate with AI service. Please check your AI Setup.'}`);
 
-        const inputField = document.getElementById('amira-input');
-        const sendBtn = document.getElementById('amira-send-btn');
+        const targetDoc = getTargetDocument();
+        const inputField = targetDoc.getElementById('amira-input');
+        const sendBtn = targetDoc.getElementById('amira-send-btn');
         if (inputField) {
             inputField.disabled = false;
             inputField.focus();

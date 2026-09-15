@@ -10,7 +10,6 @@ page 50105 "AI Collection Assistant"
     ApplicationArea = All;
     UsageCategory = None;
     Caption = 'AI Payment Collection & Invoice Follow-Up';
-    DataClassification = CustomerContent;
 
     layout
     {

@@ -166,6 +166,179 @@ codeunit 50100 "AI Management"
         GenerateCustomerEmail(Cust, EmailObjective, AdditionalNotes, EmailSubject, EmailBody);
     end;
 
+    procedure GenerateCollectionEmail(
+        CustomerName: Text;
+        ContactPerson: Text;
+        CustomerEmail: Text;
+        DocumentNo: Code[20];
+        DueDate: Date;
+        RemainingAmount: Decimal;
+        CurrencyCode: Code[10];
+        DaysOverdue: Integer;
+        EscalationTone: Text;
+        LineItemsSummary: Text;
+        CustomNotes: Text;
+        var EmailSubject: Text;
+        var EmailBody: Text)
+    var
+        AISetup: Record "AI Setup";
+        Prompt: Text;
+        RawResponse: Text;
+        SubjectPos: Integer;
+        BodyPos: Integer;
+        CurrCodeDisplay: Text;
+        GreetingName: Text;
+    begin
+        AISetup.GetSetup();
+
+        GreetingName := ContactPerson;
+        if GreetingName = '' then
+            GreetingName := CustomerName;
+
+        CurrCodeDisplay := CurrencyCode;
+        if CurrCodeDisplay = '' then
+            CurrCodeDisplay := 'LCY';
+
+        if (AISetup."API Key" <> '') and (AISetup."API Endpoint" <> '') then begin
+            Prompt := StrSubstNo(
+                'Draft a professional, context-aware payment collection / invoice follow-up email in Microsoft Dynamics 365 Business Central:\' +
+                'Customer Organization: %1\' +
+                'Addressed Contact: %2\' +
+                'Contact Email: %3\' +
+                'Invoice / Document No: %4\' +
+                'Invoice Due Date: %5\' +
+                'Outstanding Balance: %6 %7\' +
+                'Days Overdue: %8 days\' +
+                'Selected Tone/Escalation Level: %9\' +
+                'Purchased Items Context: %10\' +
+                'Account Manager Custom Notes: %11\\' +
+                'Guidelines:\' +
+                '- Write from the Accounts Receivable / Finance team.\' +
+                '- Tone Style based on Selected Tone:\' +
+                '  * "Friendly Reminder": Courteous, constructive, checking if they received the invoice and if they need assistance.\' +
+                '  * "Firm Follow-up": Professional and direct, emphasizing the payment terms and requesting confirmation of the payment date.\' +
+                '  * "Urgent / Credit Hold Warning": Formal and urgent, noting that continued non-payment may result in account hold or suspension of new orders.\' +
+                '- Reference purchased items/services naturally if available.\' +
+                '- Format with exact markers:\' +
+                'SUBJECT: <Subject Line>\' +
+                'BODY:\' +
+                '<Complete email body with formal greeting and sign-off placeholder>',
+                CustomerName,
+                GreetingName,
+                CustomerEmail,
+                DocumentNo,
+                DueDate,
+                RemainingAmount,
+                CurrCodeDisplay,
+                DaysOverdue,
+                EscalationTone,
+                LineItemsSummary,
+                CustomNotes
+            );
+
+            if TryAskAI(Prompt, RawResponse) then begin
+                SubjectPos := StrPos(RawResponse, 'SUBJECT:');
+                BodyPos := StrPos(RawResponse, 'BODY:');
+
+                if (SubjectPos > 0) and (BodyPos > SubjectPos) then begin
+                    EmailSubject := CopyStr(RawResponse, SubjectPos + 8, BodyPos - (SubjectPos + 8));
+                    EmailSubject := EmailSubject.Trim();
+                    EmailBody := CopyStr(RawResponse, BodyPos + 5);
+                    EmailBody := EmailBody.Trim();
+                    exit;
+                end;
+            end;
+        end;
+
+        // Built-in intelligent template fallback
+        GetBuiltInCollectionTemplate(CustomerName, GreetingName, DocumentNo, DueDate, RemainingAmount, CurrCodeDisplay, DaysOverdue, EscalationTone, LineItemsSummary, EmailSubject, EmailBody);
+    end;
+
+    local procedure GetBuiltInCollectionTemplate(
+        CustomerName: Text;
+        ContactPerson: Text;
+        DocumentNo: Code[20];
+        DueDate: Date;
+        RemainingAmount: Decimal;
+        CurrencyCode: Text;
+        DaysOverdue: Integer;
+        EscalationTone: Text;
+        LineItemsSummary: Text;
+        var EmailSubject: Text;
+        var EmailBody: Text)
+    var
+        ItemsNote: Text;
+    begin
+        if LineItemsSummary <> '' then
+            ItemsNote := StrSubstNo(' (covering %1)', LineItemsSummary);
+
+        case EscalationTone of
+            'Urgent / Credit Hold Warning':
+                begin
+                    EmailSubject := StrSubstNo('URGENT: Outstanding Balance for Invoice %1 - %2', DocumentNo, CustomerName);
+                    EmailBody := StrSubstNo(
+                        'Dear %1,\' +
+                        'This is a formal notice regarding unpaid invoice %2%3, which was due on %4 and is now %5 days past due.\' +
+                        'Outstanding Amount: %6 %7\' +
+                        'To prevent potential interruption of your credit facility or a hold on pending shipments, please arrange immediate settlement of this balance or contact our finance department with remittance confirmation today.\' +
+                        'Thank you for your prompt cooperation.\' +
+                        'Sincerely,\' +
+                        'Accounts Receivable & Finance Team\' +
+                        '%8',
+                        ContactPerson, DocumentNo, ItemsNote, DueDate, DaysOverdue, RemainingAmount, CurrencyCode, CustomerName
+                    );
+                end;
+            'Firm Follow-up':
+                begin
+                    EmailSubject := StrSubstNo('Follow-Up: Overdue Payment for Invoice %1 - %2', DocumentNo, CustomerName);
+                    EmailBody := StrSubstNo(
+                        'Dear %1,\' +
+                        'We are writing to follow up on invoice %2%3 for the amount of %6 %7, which was due for payment on %4 (%5 days overdue).\' +
+                        'Please verify the payment status with your accounts payable department and let us know when we can expect settlement.\' +
+                        'If you require an additional copy of the invoice or banking details, please do not hesitate to reach out.\' +
+                        'Kind regards,\' +
+                        'Credit Control & Finance Department\' +
+                        '%8',
+                        ContactPerson, DocumentNo, ItemsNote, DueDate, DaysOverdue, RemainingAmount, CurrencyCode, CustomerName
+                    );
+                end;
+            else
+                begin
+                    EmailSubject := StrSubstNo('Friendly Reminder: Statement for Invoice %1 - %2', DocumentNo, CustomerName);
+                    EmailBody := StrSubstNo(
+                        'Dear %1,\' +
+                        'We hope this email finds you well.\' +
+                        'This is a courtesy reminder that invoice %2%3 in the amount of %6 %7 reached its scheduled payment date on %4.\' +
+                        'If payment has already been processed, please disregard this note. Otherwise, please facilitate payment at your earliest convenience.\' +
+                        'Thank you for your ongoing partnership.\' +
+                        'Best regards,\' +
+                        'Finance & Customer Accounts Team\' +
+                        '%8',
+                        ContactPerson, DocumentNo, ItemsNote, DueDate, RemainingAmount, CurrencyCode, CustomerName
+                    );
+                end;
+        end;
+    end;
+
+    [TryFunction]
+    procedure TryGenerateCollectionEmail(
+        CustomerName: Text;
+        ContactPerson: Text;
+        CustomerEmail: Text;
+        DocumentNo: Code[20];
+        DueDate: Date;
+        RemainingAmount: Decimal;
+        CurrencyCode: Code[10];
+        DaysOverdue: Integer;
+        EscalationTone: Text;
+        LineItemsSummary: Text;
+        CustomNotes: Text;
+        var EmailSubject: Text;
+        var EmailBody: Text)
+    begin
+        GenerateCollectionEmail(CustomerName, ContactPerson, CustomerEmail, DocumentNo, DueDate, RemainingAmount, CurrencyCode, DaysOverdue, EscalationTone, LineItemsSummary, CustomNotes, EmailSubject, EmailBody);
+    end;
+
     procedure AskERPGuide(UserQuestion: Text): Text
     var
         Prompt: Text;

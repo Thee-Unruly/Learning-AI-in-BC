@@ -457,12 +457,19 @@ codeunit 50100 "AI Management"
                 'Liquid Cash & Bank Holdings: %13 LCY\' +
                 'Accounts Receivable (A/R): %14 LCY\' +
                 'Accounts Payable (A/P): %15 LCY\\' +
-                'Structure your commentary with clear markdown headings:\' +
-                '### 1. Executive Summary\' +
-                '### 2. Revenue Performance & Drivers\' +
-                '### 3. Expense & Margin Variance Analysis\' +
-                '### 4. Cash Flow & Working Capital Health\' +
-                '### 5. Strategic Recommendations for Management\\' +
+                'Output format requirements:\' +
+                '- Use clean HTML markup formatted for an ERP rich-text card:\' +
+                '  * Use <h3> for section titles (e.g. <h3>1. Executive Summary</h3>)\' +
+                '  * Use <p> for paragraphs with proper narrative flow\' +
+                '  * Use <strong> for all financial figures, percentages, and key metrics\' +
+                '  * Use <em> for emphasis and strategic observations\' +
+                '  * Use <ul><li> for bulleted breakdown points and recommendations\' +
+                '- Structure sections:\' +
+                '  1. Executive Summary\' +
+                '  2. Revenue Performance & Growth Drivers\' +
+                '  3. Expense & Margin Variance Analysis\' +
+                '  4. Cash Flow & Working Capital Health\' +
+                '  5. Strategic Recommendations for Management\\' +
                 'Tone: Sophisticated, data-driven, strategic, and practical. Highlight potential risk areas (e.g. A/R aging or rising OpEx) and celebrate revenue growth.',
                 PeriodName,
                 CurrentRevenue,
@@ -482,7 +489,7 @@ codeunit 50100 "AI Management"
             );
 
             if TryAskAI(Prompt, RawResponse) then begin
-                CommentaryText := RawResponse;
+                CommentaryText := FormatToRichHTML(RawResponse);
                 exit;
             end;
         end;
@@ -518,42 +525,153 @@ codeunit 50100 "AI Management"
         Report: Text;
     begin
         if RevenueVariancePct >= 0 then
-            RevTrend := StrSubstNo('positive growth of +%1%', RevenueVariancePct)
+            RevTrend := StrSubstNo('positive growth of <strong>+%1%</strong>', RevenueVariancePct)
         else
-            RevTrend := StrSubstNo('a contraction of %1%', RevenueVariancePct);
+            RevTrend := StrSubstNo('a contraction of <strong>%1%</strong>', RevenueVariancePct);
 
         if NetProfitVariancePct >= 0 then
-            ProfitTrend := StrSubstNo('improved by +%1%', NetProfitVariancePct)
+            ProfitTrend := StrSubstNo('improved by <strong>+%1%</strong>', NetProfitVariancePct)
         else
-            ProfitTrend := StrSubstNo('contracted by %1%', NetProfitVariancePct);
+            ProfitTrend := StrSubstNo('contracted by <strong>%1%</strong>', NetProfitVariancePct);
 
         Report := StrSubstNo(
-            '# Executive Financial & Cash Flow Commentary (%1)\\' +
-            '### 1. Executive Summary\' +
-            'For the evaluated period (%1), the organization recorded total revenue of %2 LCY (%4 compared to prior period %3 LCY). Net operating earnings concluded at %10 LCY (%12), reflecting steady operational momentum across core business units.\\' +
-            '### 2. Revenue Performance & Drivers\' +
-            '- Current Revenue: %2 LCY (Prior: %3 LCY, %4)\' +
-            '- Cost of Sales (COGS): %5 LCY (Prior: %6 LCY)\' +
-            '- Gross Margin: Healthy gross spread maintained, driven by stable pricing and consistent sales order delivery volume.\\' +
-            '### 3. Expense & Margin Variance Analysis\' +
-            '- Operating Expenses (OpEx): %7 LCY (Prior: %8 LCY, Variance: %9%)\' +
-            '- Net Operating Profit: %10 LCY (%12)\' +
-            '- Margin Commentary: Overhead and administrative disbursements remain aligned with budgetary targets, preventing margin leakage.\\' +
-            '### 4. Cash Flow & Working Capital Health\' +
-            '- Liquid Cash & Bank Position: %13 LCY\' +
-            '- Accounts Receivable (A/R): %14 LCY\' +
-            '- Accounts Payable (A/P): %15 LCY\' +
-            '- Liquidity Assessment: Current cash reserves comfortably cover short-term operational liabilities. Accounts receivable represents active billing pipelines.\\' +
-            '### 5. Strategic Recommendations for Management\' +
-            '1. Accelerate Accounts Receivable collections through the AI Collection Assistant to optimize working capital turnover.\' +
-            '2. Conduct vendor renegotiations on top supplier accounts to further strengthen gross margin realization.\' +
-            '3. Maintain discipline on discretionary operating expenditures into the upcoming reporting cycle.',
+            '<h3>1. Executive Summary</h3>' +
+            '<p>For the evaluated period (<em>%1</em>), the organization recorded total revenue of <strong>%2 LCY</strong> (%4 compared to prior period <strong>%3 LCY</strong>). Net operating earnings concluded at <strong>%10 LCY</strong> (%12), reflecting operational realignment across core business activities.</p>' +
+            '<h3>2. Revenue Performance & Drivers</h3>' +
+            '<ul>' +
+            '<li><strong>Period Revenue:</strong> <strong>%2 LCY</strong> (Prior: %3 LCY | Variance: %4)</li>' +
+            '<li><strong>Cost of Goods Sold (COGS):</strong> <strong>%5 LCY</strong> (Prior: %6 LCY)</li>' +
+            '<li><em>Gross Margin Insight:</em> Direct cost movements mirrored delivery volume, maintaining unit profitability.</li>' +
+            '</ul>' +
+            '<h3>3. Expense & Margin Variance Analysis</h3>' +
+            '<ul>' +
+            '<li><strong>Operating Expenses (OpEx):</strong> <strong>%7 LCY</strong> (Prior: %8 LCY | Variance: <strong>%9%</strong>)</li>' +
+            '<li><strong>Net Operating Result:</strong> <strong>%10 LCY</strong> (%12)</li>' +
+            '<li><em>Cost Containment:</em> Administrative disbursements and discretionary expenditures remain strictly managed.</li>' +
+            '</ul>' +
+            '<h3>4. Cash Flow & Working Capital Health</h3>' +
+            '<ul>' +
+            '<li><strong>Liquid Cash & Bank Reserves:</strong> <strong>%13 LCY</strong></li>' +
+            '<li><strong>Accounts Receivable (A/R):</strong> <strong>%14 LCY</strong></li>' +
+            '<li><strong>Accounts Payable (A/P):</strong> <strong>%15 LCY</strong></li>' +
+            '<li><em>Working Capital Assessment:</em> Receivables represent the primary liquidity asset requiring active collection follow-up.</li>' +
+            '</ul>' +
+            '<h3>5. Strategic Recommendations for Management</h3>' +
+            '<ol>' +
+            '<li><strong>Accelerate A/R Turnover:</strong> Utilize the <em>AI Collection Assistant</em> on overdue invoices to optimize cash conversion.</li>' +
+            '<li><strong>Supplier Payment Scheduling:</strong> Align Accounts Payable disbursements with incoming customer remittances.</li>' +
+            '<li><strong>Maintain Expenditure Discipline:</strong> Preserve low fixed overheads into the upcoming business cycle.</li>' +
+            '</ol>',
             PeriodName, CurrentRevenue, PriorRevenue, RevTrend, CurrentCOGS, PriorCOGS,
             CurrentOpEx, PriorOpEx, OpExVariancePct, CurrentNetProfit, PriorNetProfit, ProfitTrend,
             CashBalance, ReceivablesBalance, PayablesBalance
         );
 
         exit(Report);
+    end;
+
+    procedure FormatToRichHTML(InputText: Text): Text
+    var
+        Lines: List of [Text];
+        Line: Text;
+        ResultHtml: Text;
+        InList: Boolean;
+        InNumList: Boolean;
+        TrimmedLine: Text;
+        FormattedLine: Text;
+    begin
+        if InputText = '' then
+            exit('');
+
+        // If already full HTML with tags
+        if InputText.Contains('<h3>') or InputText.Contains('<p>') or InputText.Contains('<ul>') then
+            exit(InputText);
+
+        Lines := InputText.Split(10); // Split by newline
+
+        foreach Line in Lines do begin
+            TrimmedLine := Line.Trim();
+            TrimmedLine := TrimmedLine.Replace(Format(13), '');
+
+            if TrimmedLine <> '' then begin
+                if TrimmedLine.StartsWith('### ') then begin
+                    if InList then begin ResultHtml += '</ul>'; InList := false; end;
+                    if InNumList then begin ResultHtml += '</ol>'; InNumList := false; end;
+                    FormattedLine := ConvertInlineMarkdown(TrimmedLine.Substring(5));
+                    ResultHtml += StrSubstNo('<h3>%1</h3>', FormattedLine);
+                end else if TrimmedLine.StartsWith('## ') then begin
+                    if InList then begin ResultHtml += '</ul>'; InList := false; end;
+                    if InNumList then begin ResultHtml += '</ol>'; InNumList := false; end;
+                    FormattedLine := ConvertInlineMarkdown(TrimmedLine.Substring(4));
+                    ResultHtml += StrSubstNo('<h2>%1</h2>', FormattedLine);
+                end else if TrimmedLine.StartsWith('# ') then begin
+                    if InList then begin ResultHtml += '</ul>'; InList := false; end;
+                    if InNumList then begin ResultHtml += '</ol>'; InNumList := false; end;
+                    FormattedLine := ConvertInlineMarkdown(TrimmedLine.Substring(3));
+                    ResultHtml += StrSubstNo('<h2>%1</h2>', FormattedLine);
+                end else if TrimmedLine.StartsWith('- ') or TrimmedLine.StartsWith('* ') then begin
+                    if not InList then begin
+                        if InNumList then begin ResultHtml += '</ol>'; InNumList := false; end;
+                        ResultHtml += '<ul>';
+                        InList := true;
+                    end;
+                    FormattedLine := ConvertInlineMarkdown(TrimmedLine.Substring(3));
+                    ResultHtml += StrSubstNo('<li>%1</li>', FormattedLine);
+                end else if (StrLen(TrimmedLine) > 3) and (TrimmedLine.Substring(2, 2) = '. ') then begin
+                    if not InNumList then begin
+                        if InList then begin ResultHtml += '</ul>'; InList := false; end;
+                        ResultHtml += '<ol>';
+                        InNumList := true;
+                    end;
+                    FormattedLine := ConvertInlineMarkdown(TrimmedLine.Substring(4));
+                    ResultHtml += StrSubstNo('<li>%1</li>', FormattedLine);
+                end else begin
+                    if InList then begin ResultHtml += '</ul>'; InList := false; end;
+                    if InNumList then begin ResultHtml += '</ol>'; InNumList := false; end;
+                    FormattedLine := ConvertInlineMarkdown(TrimmedLine);
+                    ResultHtml += StrSubstNo('<p>%1</p>', FormattedLine);
+                end;
+            end;
+        end;
+
+        if InList then ResultHtml += '</ul>';
+        if InNumList then ResultHtml += '</ol>';
+
+        exit(ResultHtml);
+    end;
+
+    local procedure ConvertInlineMarkdown(InputStr: Text): Text
+    var
+        Res: Text;
+        P1: Integer;
+        P2: Integer;
+        Target: Text;
+    begin
+        Res := InputStr;
+
+        // Convert bold **text** to <strong>text</strong>
+        while Res.Contains('**') do begin
+            P1 := StrPos(Res, '**');
+            P2 := StrPos(CopyStr(Res, P1 + 2), '**');
+            if P2 > 0 then begin
+                Target := CopyStr(Res, P1 + 2, P2 - 1);
+                Res := CopyStr(Res, 1, P1 - 1) + '<strong>' + Target + '</strong>' + CopyStr(Res, P1 + 2 + P2 + 1);
+            end else
+                Res := Res.Replace('**', '');
+        end;
+
+        // Convert italics *text* to <em>text</em>
+        while Res.Contains('*') do begin
+            P1 := StrPos(Res, '*');
+            P2 := StrPos(CopyStr(Res, P1 + 1), '*');
+            if P2 > 0 then begin
+                Target := CopyStr(Res, P1 + 1, P2 - 1);
+                Res := CopyStr(Res, 1, P1 - 1) + '<em>' + Target + '</em>' + CopyStr(Res, P1 + 1 + P2);
+            end else
+                Res := Res.Replace('*', '');
+        end;
+
+        exit(Res);
     end;
 
     [TryFunction]

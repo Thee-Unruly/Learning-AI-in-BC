@@ -1,38 +1,28 @@
 namespace DefaultPublisher.ALProject1;
 
-using Microsoft.Finance.RoleCenters;
+using Microsoft.Finance.GeneralLedger.Account;
 
-pageextension 50102 BusinessManagerRoleCenterAIExt extends "Business Manager Role Center"
+pageextension 50107 ChartOfAccountsAIExt extends "Chart of Accounts"
 {
-    layout
-    {
-        addlast(rolecenter)
-        {
-            part(AIChatBotWidget; "AI Chat Bot CardPart")
-            {
-                ApplicationArea = All;
-            }
-        }
-    }
-
     actions
     {
         addlast(processing)
         {
-            group(AIFinanceIntelligenceGroup)
+            group(AIFinancialExplainerGroup)
             {
                 Caption = 'AI Financial Intelligence';
                 Image = Sparkle;
 
-                action(OpenAIFinancialCommentary)
+                action(OpenAIFinancialExplainer)
                 {
-                    Caption = 'AI Financial & Cash Flow Commentary';
-                    ToolTip = 'Generate a 1-page executive financial commentary and cash flow analysis comparing current performance against the prior period.';
+                    Caption = 'AI Financial Variance Explainer';
+                    ToolTip = 'Analyze G/L net changes, revenue trends, expense variances, and working capital with AI.';
                     ApplicationArea = All;
                     Image = Sparkle;
                     Promoted = true;
                     PromotedCategory = Process;
                     PromotedIsBig = true;
+                    PromotedOnly = true;
 
                     trigger OnAction()
                     var

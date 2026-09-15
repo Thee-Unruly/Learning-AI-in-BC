@@ -17,6 +17,28 @@ pageextension 50102 BusinessManagerRoleCenterAIExt extends "Business Manager Rol
 
     actions
     {
+        addfirst(embedding)
+        {
+            action(NavFinancialCommentary)
+            {
+                Caption = 'AI Financial Commentary';
+                ToolTip = 'Generate a 1-page executive financial commentary and cash flow analysis comparing current performance against the prior period.';
+                ApplicationArea = All;
+                Image = Sparkle;
+                RunObject = Page "AI Financial Commentary";
+            }
+        }
+        addlast(creation)
+        {
+            action(ActionFinancialCommentary)
+            {
+                Caption = 'AI Financial Commentary';
+                ToolTip = 'Generate a 1-page executive financial commentary and cash flow analysis comparing current performance against the prior period.';
+                ApplicationArea = All;
+                Image = Sparkle;
+                RunObject = Page "AI Financial Commentary";
+            }
+        }
         addlast(processing)
         {
             group(AIFinanceIntelligenceGroup)
@@ -30,16 +52,7 @@ pageextension 50102 BusinessManagerRoleCenterAIExt extends "Business Manager Rol
                     ToolTip = 'Generate a 1-page executive financial commentary and cash flow analysis comparing current performance against the prior period.';
                     ApplicationArea = All;
                     Image = Sparkle;
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
-
-                    trigger OnAction()
-                    var
-                        FinancialCommentaryPage: Page "AI Financial Commentary";
-                    begin
-                        FinancialCommentaryPage.Run();
-                    end;
+                    RunObject = Page "AI Financial Commentary";
                 }
             }
         }

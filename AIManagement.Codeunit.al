@@ -579,6 +579,8 @@ codeunit 50100 "AI Management"
         InNumList: Boolean;
         TrimmedLine: Text;
         FormattedLine: Text;
+        LF: Char;
+        CR: Char;
     begin
         if InputText = '' then
             exit('');
@@ -587,11 +589,13 @@ codeunit 50100 "AI Management"
         if InputText.Contains('<h3>') or InputText.Contains('<p>') or InputText.Contains('<ul>') then
             exit(InputText);
 
-        Lines := InputText.Split(10); // Split by newline
+        LF := 10;
+        CR := 13;
+        Lines := InputText.Split(LF); // Split by newline
 
         foreach Line in Lines do begin
             TrimmedLine := Line.Trim();
-            TrimmedLine := TrimmedLine.Replace(Format(13), '');
+            TrimmedLine := TrimmedLine.Replace(Format(CR), '');
 
             if TrimmedLine <> '' then begin
                 if TrimmedLine.StartsWith('### ') then begin
